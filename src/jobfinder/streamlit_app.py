@@ -579,7 +579,7 @@ def main() -> None:
 
     with left:
         st.subheader("🗂️ Ranked Jobs")
-        with _scroll_container(760):
+        with _scroll_container(1520):
             for idx, row in enumerate(filtered, start=1):
                 job_id = int(row["job_id"])
                 score = float(row["total_score"])
