@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="860" viewBox="0 0 1380 860" role="img" aria-labelledby="title desc">
+  <title id="title">Data and Storage Map</title>
+  <desc id="desc">Database tables and filesystem outputs produced by JobFinder runs.</desc>
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fbff"/>
+      <stop offset="100%" stop-color="#eaf2ff"/>
+    </linearGradient>
+    <style><![CDATA[
+      .h1 { font: 700 32px 'Segoe UI', Arial, sans-serif; fill: #15365c; }
+      .h2 { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #173f6b; }
+      .txt { font: 500 14px 'Segoe UI', Arial, sans-serif; fill: #234d7b; }
+      .arrow { stroke: #2d649f; stroke-width: 2.8; fill: none; marker-end: url(#ah3); }
+    ]]></style>
+    <marker id="ah3" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#2d649f"/>
+    </marker>
+  </defs>
+
+  <rect width="1380" height="860" fill="url(#bg3)"/>
+  <text x="46" y="62" class="h1">Persistence Layout</text>
+
+  <rect x="46" y="104" width="620" height="700" rx="18" fill="#ffffff" stroke="#79a4d8" stroke-width="2"/>
+  <text x="70" y="142" class="h2">SQLite (`data/jobfinder.sqlite`)</text>
+
+  <rect x="76" y="176" width="560" height="84" rx="10" fill="#f4f9ff" stroke="#9bc0eb"/>
+  <text x="96" y="208" class="txt">runs: one row per execution, status + timing metadata</text>
+  <text x="96" y="231" class="txt">run_source_status: source-level health and counts</text>
+
+  <rect x="76" y="280" width="560" height="104" rx="10" fill="#f4f9ff" stroke="#9bc0eb"/>
+  <text x="96" y="312" class="txt">jobs: canonical current view per source/source_job_id</text>
+  <text x="96" y="335" class="txt">job_versions: history by content_hash + raw snapshot pointer</text>
+  <text x="96" y="358" class="txt">alerts: unseen postings within dedup window policy</text>
+
+  <rect x="76" y="404" width="560" height="104" rx="10" fill="#f4f9ff" stroke="#9bc0eb"/>
+  <text x="96" y="436" class="txt">job_scores: rule/semantic/llm/total + rationale per run</text>
+  <text x="96" y="459" class="txt">profile_snapshots: immutable profile config used for run</text>
+
+  <rect x="76" y="528" width="560" height="250" rx="10" fill="#f4f9ff" stroke="#9bc0eb"/>
+  <text x="96" y="560" class="txt">Main query paths used by UI/CLI:</text>
+  <text x="96" y="588" class="txt">• latest run → source statuses → ranked jobs</text>
+  <text x="96" y="614" class="txt">• run detail page (`/runs/{run_id}`)</text>
+  <text x="96" y="640" class="txt">• job detail page (`/jobs/{job_id}`) + latest version</text>
+  <text x="96" y="666" class="txt">• report regeneration by profile/latest run</text>
+  <text x="96" y="692" class="txt">• prune old runs/scores/alerts by retention window</text>
+
+  <rect x="714" y="104" width="620" height="700" rx="18" fill="#ffffff" stroke="#79a4d8" stroke-width="2"/>
+  <text x="738" y="142" class="h2">Filesystem Artifacts</text>
+
+  <rect x="744" y="176" width="560" height="112" rx="10" fill="#f7fff8" stroke="#8ec8a0"/>
+  <text x="764" y="208" class="txt">data/raw/YYYY/MM/DD/*.json.gz</text>
+  <text x="764" y="231" class="txt">Compact immutable raw payload snapshots per fetched posting</text>
+  <text x="764" y="254" class="txt">Referenced by `raw_snapshot_id` in job_versions</text>
+
+  <rect x="744" y="308" width="560" height="112" rx="10" fill="#f7fff8" stroke="#8ec8a0"/>
+  <text x="764" y="340" class="txt">data/index/faiss/{run_id}/</text>
+  <text x="764" y="363" class="txt">Per-run FAISS index persisted from semantic scoring stage</text>
+  <text x="764" y="386" class="txt">Supports reproducibility and debugging relevance</text>
+
+  <rect x="744" y="440" width="560" height="132" rx="10" fill="#f7fff8" stroke="#8ec8a0"/>
+  <text x="764" y="472" class="txt">data/reports/YYYY-MM-DD/{run_id}.md</text>
+  <text x="764" y="495" class="txt">Human digest: source health + top ranked jobs + rationale</text>
+  <text x="764" y="518" class="txt">data/reports/YYYY-MM-DD/{run_id}.json</text>
+  <text x="764" y="541" class="txt">Machine-readable run/report payload</text>
+
+  <rect x="744" y="592" width="560" height="186" rx="10" fill="#f7fff8" stroke="#8ec8a0"/>
+  <text x="764" y="624" class="txt">Operational files</text>
+  <text x="764" y="650" class="txt">• config/search_profiles.yaml</text>
+  <text x="764" y="674" class="txt">• .env (`JOBFINDER_*`)</text>
+  <text x="764" y="698" class="txt">• systemd/jobfinder.service + jobfinder.timer</text>
+  <text x="764" y="722" class="txt">• README, tests, and web templates/static assets</text>
+
+  <path class="arrow" d="M636 318 L744 232"/>
+  <path class="arrow" d="M636 458 L744 364"/>
+  <path class="arrow" d="M636 590 L744 506"/>
+</svg>

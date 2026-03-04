@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="740" viewBox="0 0 1680 740" role="img" aria-labelledby="title desc">
+  <title id="title">LangGraph Pipeline Nodes</title>
+  <desc id="desc">Pipeline sequence from loading profile to finalizing run status.</desc>
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f1f8ff"/>
+      <stop offset="100%" stop-color="#deecff"/>
+    </linearGradient>
+    <style><![CDATA[
+      .header { font: 700 32px 'Segoe UI', Arial, sans-serif; fill: #10335b; }
+      .sub { font: 500 17px 'Segoe UI', Arial, sans-serif; fill: #32557f; }
+      .node-title { font: 700 14px 'Segoe UI', Arial, sans-serif; fill: #11355e; }
+      .node-desc { font: 500 12px 'Segoe UI', Arial, sans-serif; fill: #2b547f; }
+      .arrow { stroke: #2f659e; stroke-width: 2.5; fill: none; marker-end: url(#ah); }
+    ]]></style>
+    <marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#2f659e"/>
+    </marker>
+  </defs>
+
+  <rect width="1680" height="740" fill="url(#bg2)"/>
+  <text x="50" y="62" class="header">LangGraph Execution Flow</text>
+  <text x="50" y="92" class="sub">Exact node order used by `JobFinderWorkflow`</text>
+
+  <g transform="translate(50,130)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
+    <text x="16" y="28" class="node-title">1. load_profile</text>
+    <text x="16" y="50" class="node-desc">start run + snapshot profile</text>
+  </g>
+
+  <g transform="translate(310,130)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
+    <text x="16" y="28" class="node-title">2. expand_queries</text>
+    <text x="16" y="50" class="node-desc">roles + locations terms</text>
+  </g>
+
+  <g transform="translate(570,130)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
+    <text x="16" y="28" class="node-title">3. fetch_sources_parallel</text>
+    <text x="16" y="50" class="node-desc">parallel adapter fetch</text>
+  </g>
+
+  <g transform="translate(830,130)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
+    <text x="16" y="28" class="node-title">4. normalize_records</text>
+    <text x="16" y="50" class="node-desc">save raw snapshot + normalize</text>
+  </g>
+
+  <g transform="translate(1090,130)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
+    <text x="16" y="28" class="node-title">5. deduplicate_and_upsert</text>
+    <text x="16" y="50" class="node-desc">SQLite upsert + alert policy</text>
+  </g>
+
+  <g transform="translate(1350,130)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
+    <text x="16" y="28" class="node-title">6. rule_filter</text>
+    <text x="16" y="50" class="node-desc">keyword/location pre-score</text>
+  </g>
+
+  <g transform="translate(50,330)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
+    <text x="16" y="28" class="node-title">7. embedding_score</text>
+    <text x="16" y="50" class="node-desc">FAISS semantic relevance</text>
+  </g>
+
+  <g transform="translate(310,330)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
+    <text x="16" y="28" class="node-title">8. llm_fit_score</text>
+    <text x="16" y="50" class="node-desc">Ollama structured fit scoring</text>
+  </g>
+
+  <g transform="translate(570,330)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
+    <text x="16" y="28" class="node-title">9. rank_and_select</text>
+    <text x="16" y="50" class="node-desc">weighted rank + freshness</text>
+  </g>
+
+  <g transform="translate(830,330)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
+    <text x="16" y="28" class="node-title">10. persist_outputs</text>
+    <text x="16" y="50" class="node-desc">source status + score rows</text>
+  </g>
+
+  <g transform="translate(1090,330)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
+    <text x="16" y="28" class="node-title">11. generate_digest</text>
+    <text x="16" y="50" class="node-desc">write markdown + JSON</text>
+  </g>
+
+  <g transform="translate(1350,330)">
+    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
+    <text x="16" y="28" class="node-title">12. finalize_run_status</text>
+    <text x="16" y="50" class="node-desc">status + warnings/errors</text>
+  </g>
+
+  <path class="arrow" d="M270 172 L300 172"/>
+  <path class="arrow" d="M530 172 L560 172"/>
+  <path class="arrow" d="M790 172 L820 172"/>
+  <path class="arrow" d="M1050 172 L1080 172"/>
+  <path class="arrow" d="M1310 172 L1340 172"/>
+
+  <path class="arrow" d="M1460 214 C1460 260 1460 290 1460 330"/>
+  <path class="arrow" d="M1350 372 L1320 372"/>
+  <path class="arrow" d="M1090 372 L1060 372"/>
+  <path class="arrow" d="M830 372 L800 372"/>
+  <path class="arrow" d="M570 372 L540 372"/>
+  <path class="arrow" d="M310 372 L280 372"/>
+
+  <rect x="50" y="510" width="1580" height="180" rx="16" fill="#ffffff" stroke="#7ea6d8" stroke-dasharray="7 6"/>
+  <text x="75" y="546" class="node-title">Failure Semantics</text>
+  <text x="75" y="575" class="node-desc">• Source errors are non-fatal and are tracked in `run_source_status`.</text>
+  <text x="75" y="600" class="node-desc">• LinkedIn block/CAPTCHA is explicitly marked as `blocked` and pipeline continues.</text>
+  <text x="75" y="625" class="node-desc">• Run becomes `failed` only when every source failed/blocked/skipped.</text>
+</svg>
