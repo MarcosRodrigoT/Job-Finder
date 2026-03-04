@@ -1,0 +1,38 @@
+profiles:
+  - profile_id: madrid_ml
+    display_name: "Madrid ML + Applied Research"
+    target_roles:
+      - "Machine Learning Engineer"
+      - "Applied Research"
+    role_synonyms:
+      - "Applied Scientist"
+      - "Research Engineer"
+      - "MLE"
+      - "AI Engineer"
+    required_skills:
+      - "python"
+      - "machine learning"
+      - "deep learning"
+    optional_skills:
+      - "langchain"
+      - "llm"
+      - "nlp"
+      - "computer vision"
+    locations:
+      - "Madrid"
+      - "Spain"
+      - "Remote"
+    location_policy: "madrid_or_spain_remote"
+    source_enabled:
+      linkedin: true
+      greenhouse_deepmind: true
+      workable_huggingface: true
+      lever_mistral: true
+      openai: true
+      anthropic: true
+    scoring_weights:
+      rule: 0.35
+      semantic: 0.30
+      llm: 0.35
+    digest_size: 15
+    dedup_days: 90
