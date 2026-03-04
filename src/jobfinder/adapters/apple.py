@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from urllib.parse import urlencode
 from urllib.parse import urlparse
 
@@ -129,7 +130,51 @@ class AppleJobsAdapter(GenericPublicCareersAdapter):
             if self._description_quality(candidate) > self._description_quality(best):
                 best = candidate
 
+        # Apple uses React Router with window.__staticRouterHydrationData = JSON.parse("...")
+        for script in soup.select("script"):
+            text = script.string or script.get_text() or ""
+            if "__staticRouterHydrationData" not in text:
+                continue
+            match = re.search(r'JSON\.parse\("((?:[^"\\]|\\.)*)"\)', text, re.DOTALL)
+            if not match:
+                continue
+            raw = match.group(1)
+            try:
+                json_string = json.loads('"' + raw + '"')
+                loaded = json.loads(json_string)
+            except (json.JSONDecodeError, ValueError):
+                continue
+            candidate = self._extract_description_from_apple_hydration(loaded)
+            if not candidate:
+                candidate = self._extract_description_from_json_blob(loaded)
+            if self._description_quality(candidate) > self._description_quality(best):
+                best = candidate
+
         return best
+
+    def _extract_description_from_apple_hydration(self, data: object) -> str:
+        if not isinstance(data, dict):
+            return ""
+        try:
+            posting = (
+                data
+                .get("loaderData", {})
+                .get("jobDetails", {})
+                .get("jobsData", {})
+                .get("localizations", {})
+                .get("en_US", {})
+                .get("posting", {})
+            )
+        except AttributeError:
+            return ""
+        if not isinstance(posting, dict):
+            return ""
+        parts = []
+        for key in ("jobSummary", "description", "minimumQualifications", "preferredQualifications"):
+            value = posting.get(key)
+            if isinstance(value, str) and value.strip():
+                parts.append(value.strip())
+        return "\n\n".join(parts)
 
     def _extract_description_from_json_blob(self, payload: object) -> str:
         best = ""

@@ -5,9 +5,13 @@ import json
 import re
 from urllib.parse import urljoin, urlparse
 
+import warnings
+
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from bs4.element import Tag
+
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 from jobfinder.adapters.base import SourceAdapter, SourceBlockedError
 from jobfinder.models.domain import NormalizedJobPosting, RawJobPosting, SearchProfile
