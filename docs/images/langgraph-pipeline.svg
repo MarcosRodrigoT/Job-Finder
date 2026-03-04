@@ -1,179 +1,202 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="1320" viewBox="0 0 1780 1320" role="img" aria-labelledby="title desc">
-  <title id="title">LangGraph Pipeline Detailed Flow</title>
-  <desc id="desc">Detailed node-by-node execution flow for JobFinder workflow including state transitions, persistence points, and failure semantics.</desc>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="1300" role="img" aria-label="JobFinder LangGraph Pipeline Diagram">
   <defs>
-    <style><![CDATA[
-      .title { font: 700 40px 'Segoe UI', Arial, sans-serif; fill: #0f2b46; }
-      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #3b5876; }
-      .lane { fill: #f7fbff; stroke: #a8c6e1; stroke-width: 2; }
-      .lane2 { fill: #f7fffb; stroke: #a7d0be; stroke-width: 2; }
-      .lane3 { fill: #fffaf4; stroke: #dbc09b; stroke-width: 2; }
-      .lane4 { fill: #f9f7ff; stroke: #c0b3df; stroke-width: 2; }
-      .node { fill: #ffffff; stroke: #b5c9dc; stroke-width: 1.8; }
-      .node-io { fill: #f5f9ff; stroke: #c8d8e8; stroke-width: 1.4; }
-      .node-title { font: 700 17px 'Segoe UI', Arial, sans-serif; fill: #183453; }
-      .node-text { font: 500 13px 'Segoe UI', Arial, sans-serif; fill: #345470; }
-      .lane-title { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #173a5d; }
-      .small { font: 500 12px 'Segoe UI', Arial, sans-serif; fill: #496783; }
-      .arrow { stroke: #3f739f; stroke-width: 2.8; fill: none; marker-end: url(#arrowhead); }
-      .dashed { stroke-dasharray: 8 6; }
-      .warn { fill: #fff4e9; stroke: #d9a96f; stroke-width: 1.6; }
-    ]]></style>
-    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#3f739f"/>
+    <marker id="down" markerWidth="8" markerHeight="6" refX="4" refY="0" orient="auto">
+      <polygon points="0 0, 8 0, 4 6" fill="#30363d"/>
     </marker>
   </defs>
 
-  <text x="46" y="60" class="title">LangGraph Workflow: Node-Level Execution</text>
-  <text x="46" y="92" class="subtitle">`src/jobfinder/graph/workflow.py` - deterministic 12-node graph with explicit state transitions</text>
+  <!-- Background -->
+  <rect width="820" height="1300" fill="#0d1117"/>
 
-  <rect x="36" y="116" width="1708" height="204" rx="14" class="lane"/>
-  <text x="56" y="148" class="lane-title">Phase A: Run Setup and Source Fetching</text>
+  <!-- Title area -->
+  <text x="30" y="44" font-family="monospace, sans-serif" font-size="24" font-weight="bold" fill="#e6edf3">LangGraph Pipeline</text>
+  <text x="30" y="66" font-family="monospace, sans-serif" font-size="13" fill="#8b949e">src/jobfinder/graph/workflow.py &#x2014; 12-node deterministic graph</text>
 
-  <rect x="58" y="170" width="256" height="128" rx="12" class="node"/>
-  <text x="76" y="198" class="node-title">1. load_profile</text>
-  <text x="76" y="220" class="node-text">- persist run start</text>
-  <text x="76" y="240" class="node-text">- snapshot profile config</text>
-  <text x="76" y="260" class="node-text">- initialize state containers</text>
+  <!-- Phase bracket: Phase A (blue) covers nodes 1-5: y=90 to y=500, height=410 -->
+  <rect x="30" y="90" width="8" height="410" rx="4" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
+  <!-- Phase A label: center y = 90 + 410/2 = 295 -->
+  <text transform="rotate(-90, 34, 295)" x="34" y="295" text-anchor="middle" font-family="monospace, sans-serif" font-size="11" font-weight="bold" fill="#58a6ff">Phase A</text>
 
-  <rect x="346" y="170" width="256" height="128" rx="12" class="node"/>
-  <text x="364" y="198" class="node-title">2. expand_queries</text>
-  <text x="364" y="220" class="node-text">- merge target roles + synonyms</text>
-  <text x="364" y="240" class="node-text">- append location terms</text>
-  <text x="364" y="260" class="node-text">- de-duplicate query list</text>
+  <!-- Phase bracket: Phase B (green) covers nodes 6-9: y=510 to y=836, height=326 -->
+  <rect x="30" y="510" width="8" height="326" rx="4" fill="#1a3a22" stroke="#3fb950" stroke-width="1.5"/>
+  <!-- Phase B label: center y = 510 + 326/2 = 673 -->
+  <text transform="rotate(-90, 34, 673)" x="34" y="673" text-anchor="middle" font-family="monospace, sans-serif" font-size="11" font-weight="bold" fill="#3fb950">Phase B</text>
 
-  <rect x="634" y="170" width="324" height="128" rx="12" class="node"/>
-  <text x="652" y="198" class="node-title">3. fetch_sources_parallel</text>
-  <text x="652" y="220" class="node-text">- concurrent adapter fetch with HTTPX</text>
-  <text x="652" y="240" class="node-text">- source status: success/error/blocked/skipped</text>
-  <text x="652" y="260" class="node-text">- capture warnings per source</text>
+  <!-- Phase bracket: Phase C (orange) covers nodes 10-12: y=846 to y=1088, height=242 -->
+  <rect x="30" y="846" width="8" height="242" rx="4" fill="#3a2a10" stroke="#d29922" stroke-width="1.5"/>
+  <!-- Phase C label: center y = 846 + 242/2 = 967 -->
+  <text transform="rotate(-90, 34, 967)" x="34" y="967" text-anchor="middle" font-family="monospace, sans-serif" font-size="11" font-weight="bold" fill="#d29922">Phase C</text>
 
-  <rect x="990" y="170" width="324" height="128" rx="12" class="node"/>
-  <text x="1008" y="198" class="node-title">4. normalize_records</text>
-  <text x="1008" y="220" class="node-text">- save raw payload snapshots (.json.gz)</text>
-  <text x="1008" y="240" class="node-text">- map source payload -> normalized model</text>
-  <text x="1008" y="260" class="node-text">- update per-source normalized counters</text>
+  <!-- ============================================================ -->
+  <!-- NODE 1: load_profile (y=90, Phase A / blue) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="90" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="90" width="4" height="74" rx="2" fill="#58a6ff"/>
+  <circle cx="135" cy="127" r="14" fill="#58a6ff"/>
+  <text x="135" y="132" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">1</text>
+  <text x="160" y="120" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">load_profile</text>
+  <text x="160" y="140" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">persist run start &#xB7; snapshot profile config</text>
 
-  <rect x="1346" y="170" width="374" height="128" rx="12" class="node"/>
-  <text x="1364" y="198" class="node-title">5. deduplicate_and_upsert</text>
-  <text x="1364" y="220" class="node-text">- upsert canonical jobs + versions</text>
-  <text x="1364" y="240" class="node-text">- evaluate dedup window (default 90 days)</text>
-  <text x="1364" y="260" class="node-text">- mark new alerts only when unseen</text>
+  <!-- Arrow: node 1 bottom (164) to node 2 top (174) -->
+  <line x1="450" y1="164" x2="450" y2="174" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <rect x="36" y="344" width="1708" height="214" rx="14" class="lane2"/>
-  <text x="56" y="376" class="lane-title">Phase B: Candidate Filtering and Scoring</text>
+  <!-- ============================================================ -->
+  <!-- NODE 2: expand_queries (y=174, Phase A) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="174" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="174" width="4" height="74" rx="2" fill="#58a6ff"/>
+  <circle cx="135" cy="211" r="14" fill="#58a6ff"/>
+  <text x="135" y="216" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">2</text>
+  <text x="160" y="204" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">expand_queries</text>
+  <text x="160" y="224" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">merge roles + synonyms &#xB7; append locations</text>
 
-  <rect x="58" y="400" width="274" height="138" rx="12" class="node"/>
-  <text x="76" y="428" class="node-title">6. rule_filter</text>
-  <text x="76" y="450" class="node-text">- deterministic title/location/skill scoring</text>
-  <text x="76" y="470" class="node-text">- keeps candidates (threshold 10)</text>
-  <text x="76" y="490" class="node-text">- fallback to all normalized jobs if empty</text>
+  <!-- Arrow: node 2 bottom (248) to node 3 top (258) -->
+  <line x1="450" y1="248" x2="450" y2="258" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <rect x="364" y="400" width="314" height="138" rx="12" class="node"/>
-  <text x="382" y="428" class="node-title">7. embedding_score</text>
-  <text x="382" y="450" class="node-text">- crawl_only: semantic score = 0</text>
-  <text x="382" y="470" class="node-text">- else Ollama embed model + FAISS</text>
-  <text x="382" y="490" class="node-text">- persist per-run FAISS index artifacts</text>
+  <!-- ============================================================ -->
+  <!-- NODE 3: fetch_sources_parallel (y=258, Phase A) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="258" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="258" width="4" height="74" rx="2" fill="#58a6ff"/>
+  <circle cx="135" cy="295" r="14" fill="#58a6ff"/>
+  <text x="135" y="300" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">3</text>
+  <text x="160" y="288" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">fetch_sources_parallel</text>
+  <text x="160" y="308" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">16 source adapters &#xB7; concurrent HTTPX</text>
+  <text x="160" y="324" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">per-source status: success / blocked / error</text>
 
-  <rect x="710" y="400" width="314" height="138" rx="12" class="node"/>
-  <text x="728" y="428" class="node-title">8. llm_fit_score</text>
-  <text x="728" y="450" class="node-text">- crawl_only: synthetic fit rationale</text>
-  <text x="728" y="470" class="node-text">- else Ollama chat fit evaluation</text>
-  <text x="728" y="490" class="node-text">- role/research/location/seniority fields</text>
+  <!-- Arrow: node 3 bottom (332) to node 4 top (342) -->
+  <line x1="450" y1="332" x2="450" y2="342" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <rect x="1056" y="400" width="314" height="138" rx="12" class="node"/>
-  <text x="1074" y="428" class="node-title">9. rank_and_select</text>
-  <text x="1074" y="450" class="node-text">- combine weighted rule/semantic/llm</text>
-  <text x="1074" y="470" class="node-text">- apply freshness bonus by posted_at</text>
-  <text x="1074" y="490" class="node-text">- sort + compute top digest set</text>
+  <!-- ============================================================ -->
+  <!-- NODE 4: normalize_records (y=342, Phase A) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="342" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="342" width="4" height="74" rx="2" fill="#58a6ff"/>
+  <circle cx="135" cy="379" r="14" fill="#58a6ff"/>
+  <text x="135" y="384" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">4</text>
+  <text x="160" y="372" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">normalize_records</text>
+  <text x="160" y="392" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">canonical schema &#xB7; save raw .json.gz</text>
 
-  <rect x="1402" y="400" width="318" height="138" rx="12" class="node"/>
-  <text x="1420" y="428" class="node-title">Intermediate State Outputs</text>
-  <text x="1420" y="450" class="node-text">rule_scores, semantic_scores, llm_fits,</text>
-  <text x="1420" y="470" class="node-text">ranked_jobs, top_jobs, alert flags,</text>
-  <text x="1420" y="490" class="node-text">profile + source status context</text>
+  <!-- Arrow: node 4 bottom (416) to node 5 top (426) -->
+  <line x1="450" y1="416" x2="450" y2="426" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <rect x="36" y="582" width="1708" height="236" rx="14" class="lane3"/>
-  <text x="56" y="614" class="lane-title">Phase C: Persistence and Reporting</text>
+  <!-- ============================================================ -->
+  <!-- NODE 5: deduplicate_and_upsert (y=426, Phase A) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="426" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="426" width="4" height="74" rx="2" fill="#58a6ff"/>
+  <circle cx="135" cy="463" r="14" fill="#58a6ff"/>
+  <text x="135" y="468" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">5</text>
+  <text x="160" y="456" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">deduplicate_and_upsert</text>
+  <text x="160" y="476" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">upsert jobs + versions &#xB7; 90-day dedup window</text>
 
-  <rect x="58" y="638" width="324" height="154" rx="12" class="node"/>
-  <text x="76" y="666" class="node-title">10. persist_outputs</text>
-  <text x="76" y="688" class="node-text">- save run_source_status rows</text>
-  <text x="76" y="708" class="node-text">- save job_scores rows for ranked jobs</text>
-  <text x="76" y="728" class="node-text">- tie each score row to job + run</text>
-  <text x="76" y="748" class="node-text">- store new-alert metadata</text>
+  <!-- Arrow: node 5 bottom (500) to node 6 top (510) -->
+  <line x1="450" y1="500" x2="450" y2="510" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <rect x="414" y="638" width="324" height="154" rx="12" class="node"/>
-  <text x="432" y="666" class="node-title">11. generate_digest</text>
-  <text x="432" y="688" class="node-text">- build markdown digest</text>
-  <text x="432" y="708" class="node-text">- build JSON digest</text>
-  <text x="432" y="728" class="node-text">- write file paths into RunResult</text>
-  <text x="432" y="748" class="node-text">- top_n = profile.digest_size</text>
+  <!-- ============================================================ -->
+  <!-- NODE 6: rule_filter (y=510, Phase B / green) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="510" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="510" width="4" height="74" rx="2" fill="#3fb950"/>
+  <circle cx="135" cy="547" r="14" fill="#3fb950"/>
+  <text x="135" y="552" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">6</text>
+  <text x="160" y="540" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">rule_filter</text>
+  <text x="160" y="560" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">title / location / skill heuristics &#xB7; threshold filter</text>
+  <text x="160" y="576" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">score weight: 35%</text>
 
-  <rect x="770" y="638" width="384" height="154" rx="12" class="node"/>
-  <text x="788" y="666" class="node-title">12. finalize_run_status</text>
-  <text x="788" y="688" class="node-text">- set completed timestamp</text>
-  <text x="788" y="708" class="node-text">- compute status: completed / warnings / errors / failed</text>
-  <text x="788" y="728" class="node-text">- fail only when no source succeeded</text>
-  <text x="788" y="748" class="node-text">- persist run completion summary</text>
+  <!-- Arrow: node 6 bottom (584) to node 7 top (594) -->
+  <line x1="450" y1="584" x2="450" y2="594" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <rect x="1186" y="638" width="534" height="154" rx="12" class="node-io"/>
-  <text x="1204" y="666" class="node-title">Artifacts Produced</text>
-  <text x="1204" y="688" class="node-text">- DB: runs, source statuses, jobs, versions, alerts, scores</text>
-  <text x="1204" y="708" class="node-text">- Files: raw snapshots, FAISS indices, md/json reports</text>
-  <text x="1204" y="728" class="node-text">- Streamlit UI reads latest persisted run data</text>
-  <text x="1204" y="748" class="node-text">- CLI prints run_id + report paths</text>
+  <!-- ============================================================ -->
+  <!-- NODE 7: embedding_score (y=594, Phase B) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="594" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="594" width="4" height="74" rx="2" fill="#3fb950"/>
+  <circle cx="135" cy="631" r="14" fill="#3fb950"/>
+  <text x="135" y="636" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">7</text>
+  <text x="160" y="624" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">embedding_score</text>
+  <text x="160" y="644" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">Ollama embed model + FAISS cosine similarity</text>
+  <text x="160" y="660" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">score weight: 30%</text>
 
-  <rect x="36" y="844" width="1708" height="430" rx="14" class="lane4"/>
-  <text x="56" y="876" class="lane-title">Operational Semantics and Control Flags</text>
+  <!-- Arrow: node 7 bottom (668) to node 8 top (678) -->
+  <line x1="450" y1="668" x2="450" y2="678" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <rect x="58" y="898" width="540" height="168" rx="12" class="warn"/>
-  <text x="76" y="928" class="node-title">Failure Policy</text>
-  <text x="76" y="952" class="node-text">- Source-level errors are isolated and logged as warnings.</text>
-  <text x="76" y="974" class="node-text">- LinkedIn block/CAPTCHA -> status=blocked (non-fatal).</text>
-  <text x="76" y="996" class="node-text">- Run fails only if every enabled source produced no success.</text>
-  <text x="76" y="1018" class="node-text">- Missing embed model triggers semantic fallback warning.</text>
-  <text x="76" y="1040" class="node-text">- LLM parse issues are captured without crashing whole run.</text>
+  <!-- ============================================================ -->
+  <!-- NODE 8: llm_fit_score (y=678, Phase B) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="678" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="678" width="4" height="74" rx="2" fill="#3fb950"/>
+  <circle cx="135" cy="715" r="14" fill="#3fb950"/>
+  <text x="135" y="720" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">8</text>
+  <text x="160" y="708" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">llm_fit_score</text>
+  <text x="160" y="728" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">Ollama chat &#xB7; role / research / location / seniority</text>
+  <text x="160" y="744" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">score weight: 35%</text>
 
-  <rect x="628" y="898" width="540" height="168" rx="12" class="node-io"/>
-  <text x="646" y="928" class="node-title">crawl_only Mode</text>
-  <text x="646" y="952" class="node-text">- Invoked by `jobfinder crawl`.</text>
-  <text x="646" y="974" class="node-text">- Skips expensive semantic and chat-model scoring.</text>
-  <text x="646" y="996" class="node-text">- Uses zero semantic score + synthetic LLM rationale.</text>
-  <text x="646" y="1018" class="node-text">- Still normalizes, deduplicates, persists, and reports.</text>
+  <!-- Arrow: node 8 bottom (752) to node 9 top (762) -->
+  <line x1="450" y1="752" x2="450" y2="762" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <rect x="1198" y="898" width="522" height="168" rx="12" class="node-io"/>
-  <text x="1216" y="928" class="node-title">State Contract Highlights</text>
-  <text x="1216" y="952" class="node-text">- JobFinderState carries profile, run_result, and intermediate maps.</text>
-  <text x="1216" y="974" class="node-text">- fingerprint key = `source:source_job_id` across scoring maps.</text>
-  <text x="1216" y="996" class="node-text">- RunResult aggregates counts, warnings/errors, top jobs, report paths.</text>
-  <text x="1216" y="1018" class="node-text">- Used by CLI output and reporting module.</text>
+  <!-- ============================================================ -->
+  <!-- NODE 9: rank_and_select (y=762, Phase B) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="762" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="762" width="4" height="74" rx="2" fill="#3fb950"/>
+  <circle cx="135" cy="799" r="14" fill="#3fb950"/>
+  <text x="135" y="804" text-anchor="middle" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">9</text>
+  <text x="160" y="792" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">rank_and_select</text>
+  <text x="160" y="812" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">weighted composite + freshness bonus &#xB7; top N digest</text>
 
-  <rect x="58" y="1088" width="1662" height="162" rx="12" class="node"/>
-  <text x="76" y="1118" class="node-title">Node Sequence</text>
-  <text x="76" y="1142" class="small">START -> load_profile -> expand_queries -> fetch_sources_parallel -> normalize_records -> deduplicate_and_upsert -> rule_filter -> embedding_score -> llm_fit_score -> rank_and_select -> persist_outputs -> generate_digest -> finalize_run_status -> END</text>
-  <text x="76" y="1170" class="small">The graph order is static and intentionally explicit for observability and easier debugging.</text>
+  <!-- Arrow: node 9 bottom (836) to node 10 top (846) -->
+  <line x1="450" y1="836" x2="450" y2="846" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <path class="arrow" d="M314 234 L346 234"/>
-  <path class="arrow" d="M602 234 L634 234"/>
-  <path class="arrow" d="M958 234 L990 234"/>
-  <path class="arrow" d="M1314 234 L1346 234"/>
+  <!-- ============================================================ -->
+  <!-- NODE 10: persist_outputs (y=846, Phase C / orange) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="846" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="846" width="4" height="74" rx="2" fill="#d29922"/>
+  <circle cx="135" cy="883" r="14" fill="#d29922"/>
+  <text x="135" y="888" text-anchor="middle" font-family="monospace, sans-serif" font-size="11" font-weight="bold" fill="#ffffff">10</text>
+  <text x="160" y="876" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">persist_outputs</text>
+  <text x="160" y="896" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">save run_source_status + job_scores rows</text>
 
-  <path class="arrow" d="M1532 298 C1532 338 1532 380 1532 400"/>
-  <path class="arrow" d="M58 470 L58 470"/>
-  <path class="arrow" d="M332 470 L364 470"/>
-  <path class="arrow" d="M678 470 L710 470"/>
-  <path class="arrow" d="M1024 470 L1056 470"/>
-  <path class="arrow" d="M1370 470 L1402 470"/>
+  <!-- Arrow: node 10 bottom (920) to node 11 top (930) -->
+  <line x1="450" y1="920" x2="450" y2="930" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
 
-  <path class="arrow" d="M1561 538 C1561 590 1561 618 1561 638"/>
-  <path class="arrow" d="M382 716 L414 716"/>
-  <path class="arrow" d="M738 716 L770 716"/>
-  <path class="arrow" d="M1154 716 L1186 716"/>
+  <!-- ============================================================ -->
+  <!-- NODE 11: generate_digest (y=930, Phase C) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="930" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="930" width="4" height="74" rx="2" fill="#d29922"/>
+  <circle cx="135" cy="967" r="14" fill="#d29922"/>
+  <text x="135" y="972" text-anchor="middle" font-family="monospace, sans-serif" font-size="11" font-weight="bold" fill="#ffffff">11</text>
+  <text x="160" y="960" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">generate_digest</text>
+  <text x="160" y="980" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">write .md + .json report files &#xB7; top_n = digest_size</text>
 
-  <path class="arrow dashed" d="M328 792 L328 898"/>
-  <path class="arrow dashed" d="M900 792 L900 898"/>
-  <path class="arrow dashed" d="M1458 792 L1458 898"/>
+  <!-- Arrow: node 11 bottom (1004) to node 12 top (1014) -->
+  <line x1="450" y1="1004" x2="450" y2="1014" stroke="#30363d" stroke-width="1.5" marker-end="url(#down)"/>
+
+  <!-- ============================================================ -->
+  <!-- NODE 12: finalize_run_status (y=1014, Phase C) -->
+  <!-- ============================================================ -->
+  <rect x="110" y="1014" width="680" height="74" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="110" y="1014" width="4" height="74" rx="2" fill="#d29922"/>
+  <circle cx="135" cy="1051" r="14" fill="#d29922"/>
+  <text x="135" y="1056" text-anchor="middle" font-family="monospace, sans-serif" font-size="11" font-weight="bold" fill="#ffffff">12</text>
+  <text x="160" y="1044" font-family="monospace, sans-serif" font-size="14" font-weight="bold" fill="#e6edf3">finalize_run_status</text>
+  <text x="160" y="1064" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">completed / warnings / errors / failed</text>
+  <text x="160" y="1080" font-family="monospace, sans-serif" font-size="12" fill="#8b949e">fails only if all sources failed or were skipped</text>
+
+  <!-- ============================================================ -->
+  <!-- Footer annotation boxes -->
+  <!-- ============================================================ -->
+
+  <!-- Box 1: crawl_only mode -->
+  <rect x="110" y="1110" width="315" height="60" rx="6" fill="#21262d" stroke="#bc8cff"/>
+  <text x="128" y="1132" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#bc8cff">crawl_only mode</text>
+  <text x="128" y="1152" font-family="monospace, sans-serif" font-size="11" fill="#8b949e">skips embedding_score + llm_fit_score</text>
+
+  <!-- Box 2: Failure policy -->
+  <rect x="455" y="1110" width="335" height="60" rx="6" fill="#21262d" stroke="#f85149"/>
+  <text x="473" y="1132" font-family="monospace, sans-serif" font-size="12" font-weight="bold" fill="#f85149">Failure policy</text>
+  <text x="473" y="1152" font-family="monospace, sans-serif" font-size="11" fill="#8b949e">run fails only if all sources failed/skipped</text>
 
 </svg>

@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
+from bs4 import BeautifulSoup
 
 from jobfinder.config import AppSettings, ensure_directories
 from jobfinder.storage import JobRepository
@@ -200,15 +201,132 @@ def _build_repository(db_path: str) -> JobRepository:
     return repo
 
 
-def _render_description(description_text: str) -> None:
-    if not description_text.strip():
+def _html_unescape_deep(text: str, rounds: int = 3) -> str:
+    current = text
+    for _ in range(rounds):
+        unescaped = html.unescape(current)
+        if unescaped == current:
+            break
+        current = unescaped
+    return current
+
+
+def _clean_html_description(markup: str) -> str:
+    soup = BeautifulSoup(markup, "html.parser")
+    for tag in soup.select("script,style,noscript,svg,iframe"):
+        tag.decompose()
+
+    selectors = [
+        "[data-autom='job-description']",
+        "[data-testid='job-description']",
+        "section[id*='job-description']",
+        "div[id*='job-description']",
+        "section[class*='job-description']",
+        "div[class*='job-description']",
+        "article",
+        "main",
+    ]
+
+    for selector in selectors:
+        node = soup.select_one(selector)
+        if node is None:
+            continue
+        for tag in node.select("script,style,noscript,svg,iframe,header,footer,nav,aside"):
+            tag.decompose()
+        candidate = node.decode_contents().strip()
+        if len(BeautifulSoup(candidate, "html.parser").get_text(" ", strip=True).split()) >= 20:
+            return candidate
+
+    for tag in soup.select("header,footer,nav,aside,form,button"):
+        tag.decompose()
+    return soup.decode_contents().strip()
+
+
+def _clean_plain_description(text: str, source: str) -> str:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if not lines:
+        return ""
+
+    if source == "apple":
+        markers = (
+            "Shop and Learn",
+            "Apple Footer",
+            "Privacy Policy",
+            "Terms of Use",
+            "Site Map",
+            "Apple Store",
+            "Copyright",
+            "United States",
+        )
+        nav_exact = {
+            "apple",
+            "store",
+            "mac",
+            "ipad",
+            "iphone",
+            "watch",
+            "vision",
+            "airpods",
+            "tv & home",
+            "entertainment",
+            "accessories",
+            "support",
+            "careers at apple",
+            "work at apple",
+            "life at apple",
+            "profile",
+            "sign in",
+            "search",
+        }
+        filtered = [
+            line
+            for line in lines
+            if (
+                not any(marker.lower() in line.lower() for marker in markers)
+                and line.strip().lower() not in nav_exact
+            )
+        ]
+        if filtered:
+            lines = filtered
+        else:
+            return ""
+
+    compact: list[str] = []
+    for line in lines:
+        if compact and line == compact[-1]:
+            continue
+        compact.append(line)
+    return "\n".join(compact)
+
+
+def _prepare_description(description_text: str, source: str) -> tuple[str, bool]:
+    raw = description_text.strip()
+    if not raw:
+        return "", False
+
+    unescaped = _html_unescape_deep(raw).strip()
+    if not unescaped:
+        return "", False
+
+    if _contains_html(unescaped):
+        cleaned_markup = _clean_html_description(unescaped)
+        if cleaned_markup:
+            return cleaned_markup, True
+
+    cleaned_text = _clean_plain_description(unescaped, source)
+    return cleaned_text, False
+
+
+def _render_description(description_text: str, source: str) -> None:
+    prepared, is_html = _prepare_description(description_text, source)
+    if not prepared:
         st.info("No description available for this job snapshot yet.")
         return
 
-    if _contains_html(description_text):
-        st.markdown(f"<div class='desc-shell desc-html'>{description_text}</div>", unsafe_allow_html=True)
+    if is_html:
+        st.markdown(f"<div class='desc-shell desc-html'>{prepared}</div>", unsafe_allow_html=True)
     else:
-        escaped = html.escape(description_text)
+        escaped = html.escape(prepared)
         st.markdown(f"<div class='desc-shell desc-pre'>{escaped}</div>", unsafe_allow_html=True)
 
 
@@ -518,7 +636,7 @@ def main() -> None:
             return
 
         st.write(f"🗓️ Posted at: {_fmt_dt(version.posted_at)}")
-        _render_description(version.description_text or "")
+        _render_description(version.description_text or "", job.source)
 
 
 if __name__ == "__main__":

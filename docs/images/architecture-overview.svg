@@ -1,166 +1,127 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1080" viewBox="0 0 1700 1080" role="img" aria-labelledby="title desc">
-  <title id="title">JobFinder Architecture Overview</title>
-  <desc id="desc">Detailed architecture for JobFinder showing entry points, runtime services, source adapters, scoring, persistence, reporting, and Streamlit dashboard.</desc>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" role="img" aria-label="JobFinder Architecture Diagram">
   <defs>
-    <style><![CDATA[
-      .title { font: 700 42px 'Segoe UI', Arial, sans-serif; fill: #0f2740; }
-      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #3d556f; }
-      .lane-title { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #173a5d; }
-      .card-title { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #16314f; }
-      .card-sub { font: 600 14px 'Segoe UI', Arial, sans-serif; fill: #345270; }
-      .card-text { font: 500 14px 'Segoe UI', Arial, sans-serif; fill: #2c4a68; }
-      .tiny { font: 500 12px 'Segoe UI', Arial, sans-serif; fill: #425f79; }
-      .panel-a { fill: #f6fbff; stroke: #9fc2df; stroke-width: 2; }
-      .panel-b { fill: #f8fffb; stroke: #98ccb4; stroke-width: 2; }
-      .panel-c { fill: #fffbf5; stroke: #d8b78f; stroke-width: 2; }
-      .panel-d { fill: #f8f7ff; stroke: #b7a6dc; stroke-width: 2; }
-      .panel-e { fill: #fff8fa; stroke: #d7a5b4; stroke-width: 2; }
-      .chip { fill: #ffffff; stroke: #b8c9d8; stroke-width: 1.5; }
-      .arrow { stroke: #3d6f9f; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
-      .dashed { stroke-dasharray: 8 6; }
-      .legend-ok { fill: #1f9d55; }
-      .legend-warn { fill: #d97706; }
-      .legend-bad { fill: #be123c; }
-      .legend-skip { fill: #475569; }
-    ]]></style>
-    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#3d6f9f"/>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#58a6ff"/>
+    </marker>
+    <marker id="arr-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#d29922"/>
+    </marker>
+    <marker id="arr-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#bc8cff"/>
     </marker>
   </defs>
 
-  <text x="48" y="62" class="title">JobFinder: Local AI Job Discovery Architecture</text>
-  <text x="48" y="94" class="subtitle">Ollama + LangGraph + Source Adapters + SQLite/FAISS + Streamlit</text>
+  <!-- Background -->
+  <rect width="1200" height="640" fill="#0d1117"/>
 
-  <rect x="36" y="122" width="1628" height="170" rx="16" class="panel-a"/>
-  <text x="56" y="154" class="lane-title">1. Entry Points and Orchestration</text>
+  <!-- Title area -->
+  <text x="40" y="50" fill="#e6edf3" font-family="'Segoe UI', system-ui, sans-serif" font-size="26" font-weight="bold">JobFinder Architecture</text>
+  <text x="40" y="72" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="14">Ollama · LangGraph · SQLite · Streamlit</text>
 
-  <rect x="62" y="172" width="368" height="100" rx="12" class="chip"/>
-  <text x="82" y="202" class="card-title">CLI Commands (Typer)</text>
-  <text x="82" y="225" class="card-text">run, crawl, report, serve, prune</text>
-  <text x="82" y="247" class="card-text">`uv run jobfinder &lt;command&gt;`</text>
+  <!-- ===================== COLUMN 1 — INPUTS ===================== -->
+  <!-- Column panel -->
+  <rect x="30" y="96" width="330" height="400" fill="#161b22" stroke="#30363d" stroke-width="1.5" rx="10"/>
+  <!-- Left accent bar -->
+  <rect x="30" y="96" width="4" height="400" fill="#58a6ff" rx="2"/>
+  <!-- Column header -->
+  <text x="55" y="126" fill="#58a6ff" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="bold" letter-spacing="2">INPUTS</text>
 
-  <rect x="460" y="172" width="368" height="100" rx="12" class="chip"/>
-  <text x="480" y="202" class="card-title">Runtime Builder</text>
-  <text x="480" y="225" class="card-text">loads `.env` + search profile YAML</text>
-  <text x="480" y="247" class="card-text">ensures data folders + DB init</text>
+  <!-- Card 1 — CLI Commands (y=140, height=110) -->
+  <rect x="50" y="140" width="298" height="110" fill="#21262d" stroke="#30363d" stroke-width="1" rx="6"/>
+  <text x="68" y="168" fill="#e6edf3" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="bold">CLI Commands</text>
+  <text x="68" y="188" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">run · crawl · report</text>
+  <text x="68" y="206" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">serve · prune</text>
+  <text x="68" y="226" fill="#8b949e" font-family="'Courier New', Courier, monospace" font-size="12">uv run jobfinder &lt;cmd&gt;</text>
 
-  <rect x="858" y="172" width="368" height="100" rx="12" class="chip"/>
-  <text x="878" y="202" class="card-title">JobFinderService</text>
-  <text x="878" y="225" class="card-text">binds adapters, vector index, LLM scorer</text>
-  <text x="878" y="247" class="card-text">runs workflow, report generation, pruning</text>
+  <!-- Card 2 — Config (y=264, height=100) -->
+  <rect x="50" y="264" width="298" height="100" fill="#21262d" stroke="#30363d" stroke-width="1" rx="6"/>
+  <text x="68" y="292" fill="#e6edf3" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="bold">Config</text>
+  <text x="68" y="312" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">search_profiles.yaml</text>
+  <text x="68" y="330" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">.env variables</text>
 
-  <rect x="1256" y="172" width="380" height="100" rx="12" class="chip"/>
-  <text x="1276" y="202" class="card-title">Optional Scheduling</text>
-  <text x="1276" y="225" class="card-text">systemd timer (`jobfinder.timer`)</text>
-  <text x="1276" y="247" class="card-text">daily unattended runs</text>
+  <!-- Card 3 — Systemd Timer (y=378, height=100) -->
+  <rect x="50" y="378" width="298" height="100" fill="#21262d" stroke="#30363d" stroke-width="1" rx="6"/>
+  <text x="68" y="406" fill="#e6edf3" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="bold">Systemd Timer</text>
+  <text x="68" y="426" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">jobfinder.timer</text>
+  <text x="68" y="444" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">daily unattended runs</text>
 
-  <rect x="36" y="322" width="1034" height="326" rx="16" class="panel-b"/>
-  <text x="56" y="354" class="lane-title">2. Ingestion and Normalization Layer</text>
+  <!-- ===================== COLUMN 2 — CORE PIPELINE ===================== -->
+  <!-- Column panel -->
+  <rect x="400" y="96" width="380" height="460" fill="#161b22" stroke="#30363d" stroke-width="1.5" rx="10"/>
+  <!-- Left accent bar -->
+  <rect x="400" y="96" width="4" height="460" fill="#58a6ff" rx="2"/>
+  <!-- Column header -->
+  <text x="420" y="126" fill="#58a6ff" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="bold" letter-spacing="2">CORE PIPELINE</text>
 
-  <rect x="62" y="372" width="486" height="252" rx="12" class="chip"/>
-  <text x="82" y="402" class="card-title">Source Adapter Registry</text>
-  <text x="82" y="426" class="card-sub">Public-only strategy (no authenticated scraping)</text>
-  <text x="82" y="452" class="card-text">- linkedin_public (guest endpoint, best effort)</text>
-  <text x="82" y="474" class="card-text">- greenhouse_deepmind</text>
-  <text x="82" y="496" class="card-text">- workable_huggingface (API then HTML fallback)</text>
-  <text x="82" y="518" class="card-text">- lever_mistral</text>
-  <text x="82" y="540" class="card-text">- openai (fallback URLs, can return 403)</text>
-  <text x="82" y="562" class="card-text">- anthropic</text>
-  <text x="82" y="592" class="tiny">Each adapter: fetch(...) -> RawJobPosting[] and normalize(...) -> NormalizedJobPosting</text>
+  <!-- Large inner card -->
+  <rect x="420" y="140" width="340" height="320" fill="#21262d" stroke="#30363d" stroke-width="1" rx="6"/>
 
-  <rect x="578" y="372" width="466" height="252" rx="12" class="chip"/>
-  <text x="598" y="402" class="card-title">LangGraph Workflow Core</text>
-  <text x="598" y="426" class="card-sub">12-node deterministic graph</text>
-  <text x="598" y="452" class="card-text">load_profile -> expand_queries -> fetch_sources_parallel</text>
-  <text x="598" y="474" class="card-text">-> normalize_records -> deduplicate_and_upsert -> rule_filter</text>
-  <text x="598" y="496" class="card-text">-> embedding_score -> llm_fit_score -> rank_and_select</text>
-  <text x="598" y="518" class="card-text">-> persist_outputs -> generate_digest -> finalize_run_status</text>
-  <text x="598" y="550" class="card-text">Failure handling:</text>
-  <text x="620" y="572" class="tiny">source-level errors are non-fatal</text>
-  <text x="620" y="592" class="tiny">run fails only when all sources fail/blocked/skipped</text>
+  <!-- Row 1 — Adapters (blue bar, y=140 to y=220) -->
+  <rect x="420" y="140" width="3" height="80" fill="#58a6ff" rx="1"/>
+  <text x="440" y="172" fill="#58a6ff" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" font-weight="bold">Adapters</text>
+  <text x="440" y="192" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">16 source adapters · concurrent fetch</text>
 
-  <rect x="1100" y="322" width="564" height="326" rx="16" class="panel-c"/>
-  <text x="1120" y="354" class="lane-title">3. Scoring and Ranking Intelligence</text>
+  <!-- Divider after Row 1 -->
+  <line x1="423" y1="220" x2="757" y2="220" stroke="#30363d" stroke-width="1"/>
 
-  <rect x="1126" y="372" width="250" height="112" rx="12" class="chip"/>
-  <text x="1146" y="402" class="card-title">Rule Score (35%)</text>
-  <text x="1146" y="424" class="card-text">title/location/skills heuristics</text>
-  <text x="1146" y="446" class="card-text">candidate thresholding</text>
+  <!-- Row 2 — Normalize (no bar, y=220 to y=300) -->
+  <text x="440" y="252" fill="#e6edf3" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" font-weight="bold">Normalize</text>
+  <text x="440" y="272" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">canonical schema · dedup · upsert</text>
 
-  <rect x="1400" y="372" width="238" height="112" rx="12" class="chip"/>
-  <text x="1420" y="402" class="card-title">Semantic (30%)</text>
-  <text x="1420" y="424" class="card-text">Ollama embeddings</text>
-  <text x="1420" y="446" class="card-text">FAISS similarity</text>
+  <!-- Divider after Row 2 -->
+  <line x1="423" y1="300" x2="757" y2="300" stroke="#30363d" stroke-width="1"/>
 
-  <rect x="1126" y="506" width="250" height="118" rx="12" class="chip"/>
-  <text x="1146" y="536" class="card-title">LLM Fit (35%)</text>
-  <text x="1146" y="558" class="card-text">`ministral-3:14b` scoring</text>
-  <text x="1146" y="580" class="card-text">role/research/location/seniority</text>
-  <text x="1146" y="602" class="card-text">+ rationale</text>
+  <!-- Row 3 — Score (green bar, y=300 to y=380) -->
+  <rect x="420" y="300" width="3" height="80" fill="#3fb950" rx="1"/>
+  <text x="440" y="332" fill="#3fb950" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" font-weight="bold">Score</text>
+  <text x="440" y="352" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">Rule (35%) · Embedding (30%) · LLM (35%)</text>
 
-  <rect x="1400" y="506" width="238" height="118" rx="12" class="chip"/>
-  <text x="1420" y="536" class="card-title">Rank + Freshness</text>
-  <text x="1420" y="558" class="card-text">weighted composite 0-100</text>
-  <text x="1420" y="580" class="card-text">recent jobs bonus</text>
-  <text x="1420" y="602" class="card-text">top N digest selection</text>
+  <!-- Divider after Row 3 -->
+  <line x1="423" y1="380" x2="757" y2="380" stroke="#30363d" stroke-width="1"/>
 
-  <rect x="36" y="678" width="1628" height="312" rx="16" class="panel-d"/>
-  <text x="56" y="710" class="lane-title">4. Persistence, Reports, and Dashboard</text>
+  <!-- Row 4 — Rank (orange bar, y=380 to y=460) -->
+  <rect x="420" y="380" width="3" height="80" fill="#d29922" rx="1"/>
+  <text x="440" y="412" fill="#d29922" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" font-weight="bold">Rank</text>
+  <text x="440" y="432" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">weighted composite · freshness bonus · top N</text>
 
-  <rect x="62" y="728" width="516" height="236" rx="12" class="chip"/>
-  <text x="82" y="758" class="card-title">SQLite Persistence (`data/jobfinder.sqlite`)</text>
-  <text x="82" y="782" class="card-text">runs, run_source_status, jobs, job_versions</text>
-  <text x="82" y="804" class="card-text">alerts, job_scores, profile_snapshots</text>
-  <text x="82" y="836" class="card-text">Canonical row + version history design:</text>
-  <text x="104" y="858" class="tiny">jobs = latest state by source/source_job_id</text>
-  <text x="104" y="878" class="tiny">job_versions = immutable snapshots with content_hash</text>
-  <text x="104" y="898" class="tiny">alerts = unseen jobs in dedup window</text>
+  <!-- Ollama sub-card -->
+  <rect x="420" y="478" width="340" height="60" fill="#21262d" stroke="#bc8cff" stroke-width="1" rx="6"/>
+  <text x="440" y="503" fill="#bc8cff" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="bold">&#9881; Ollama</text>
+  <text x="440" y="522" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">chat model · embed model (nomic-embed-text)</text>
 
-  <rect x="608" y="728" width="496" height="236" rx="12" class="chip"/>
-  <text x="628" y="758" class="card-title">Filesystem Artifacts</text>
-  <text x="628" y="782" class="card-text">`data/raw/YYYY/MM/DD/*.json.gz`</text>
-  <text x="628" y="804" class="card-text">`data/index/faiss/&lt;run_id&gt;/`</text>
-  <text x="628" y="826" class="card-text">`data/reports/YYYY-MM-DD/&lt;run_id&gt;.md`</text>
-  <text x="628" y="848" class="card-text">`data/reports/YYYY-MM-DD/&lt;run_id&gt;.json`</text>
-  <text x="628" y="880" class="tiny">`prune --days N` cleans old DB rows, snapshots, and reports</text>
+  <!-- ===================== COLUMN 3 — OUTPUTS ===================== -->
+  <!-- Column panel -->
+  <rect x="820" y="96" width="330" height="400" fill="#161b22" stroke="#30363d" stroke-width="1.5" rx="10"/>
+  <!-- Left accent bar -->
+  <rect x="820" y="96" width="4" height="400" fill="#d29922" rx="2"/>
+  <!-- Column header -->
+  <text x="845" y="126" fill="#d29922" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="bold" letter-spacing="2">OUTPUTS</text>
 
-  <rect x="1134" y="728" width="504" height="236" rx="12" class="chip"/>
-  <text x="1154" y="758" class="card-title">User-facing Outputs</text>
-  <text x="1154" y="782" class="card-text">CLI summary (run_id, counts, report paths)</text>
-  <text x="1154" y="804" class="card-text">Markdown/JSON digest for automation</text>
-  <text x="1154" y="826" class="card-text">Streamlit dashboard (`jobfinder serve`)</text>
-  <text x="1154" y="858" class="tiny">filter jobs, inspect score breakdown, view full description text</text>
-  <text x="1154" y="878" class="tiny">description rendering preserves plain-text indentation and HTML blocks</text>
+  <!-- Card 1 — SQLite (y=140, height=110, stroke blue) -->
+  <rect x="840" y="140" width="298" height="110" fill="#21262d" stroke="#58a6ff" stroke-width="1" rx="6"/>
+  <text x="858" y="168" fill="#e6edf3" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="bold">SQLite</text>
+  <text x="858" y="190" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">runs · jobs · versions · scores · alerts</text>
+  <text x="858" y="210" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">job_versions · alerts · job_scores</text>
 
-  <path class="arrow" d="M430 222 L460 222"/>
-  <path class="arrow" d="M828 222 L858 222"/>
-  <path class="arrow" d="M1226 222 L1256 222"/>
+  <!-- Card 2 — File Artifacts (y=264, height=100, stroke orange) -->
+  <rect x="840" y="264" width="298" height="100" fill="#21262d" stroke="#d29922" stroke-width="1" rx="6"/>
+  <text x="858" y="292" fill="#e6edf3" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="bold">File Artifacts</text>
+  <text x="858" y="312" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">raw snapshots (.json.gz)</text>
+  <text x="858" y="330" fill="#8b949e" font-family="'Segoe UI', system-ui, sans-serif" font-size="12">FAISS index · reports (md/json)</text>
 
-  <path class="arrow" d="M1044 500 L1126 428"/>
-  <path class="arrow" d="M1044 520 L1126 566"/>
+  <!-- Card 3 — Dashboard (y=378, height=100, stroke green) -->
+  <rect x="840" y="378" width="298" height="100" fill="#21262d" stroke="#3fb950" stroke-width="1" rx="6"/>
+  <text x="858" y="406" fill="#e6edf3" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="bold">Streamlit Dashboard</text>
+  <text x="858" y="428" fill="#8b949e" font-family="'Courier New', Courier, monospace" font-size="12">jobfinder serve</text>
 
-  <path class="arrow" d="M548 496 L578 496"/>
-  <path class="arrow" d="M1376 428 L1400 428"/>
-  <path class="arrow" d="M1376 566 L1400 566"/>
+  <!-- ===================== ARROWS ===================== -->
+  <!-- Arrow 1: Column 1 -> Column 2 (blue) -->
+  <line x1="360" y1="326" x2="398" y2="326" stroke="#58a6ff" stroke-width="2" marker-end="url(#arr)"/>
 
-  <path class="arrow" d="M1520 624 L1520 726"/>
-  <path class="arrow" d="M920 624 L920 726"/>
-  <path class="arrow" d="M320 624 L320 726"/>
+  <!-- Arrow 2: Column 2 -> Column 3 (orange) -->
+  <line x1="782" y1="326" x2="818" y2="326" stroke="#d29922" stroke-width="2" marker-end="url(#arr-orange)"/>
 
-  <path class="arrow dashed" d="M578 840 L608 840"/>
-  <path class="arrow dashed" d="M1104 840 L1134 840"/>
+  <!-- Arrow 3: Ollama card bottom -> Column 2 big card bottom (purple dashed, upward) -->
+  <line x1="590" y1="477" x2="590" y2="425" stroke="#bc8cff" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-purple)"/>
 
-  <g transform="translate(1390,126)">
-    <rect x="0" y="0" width="260" height="154" rx="10" class="chip"/>
-    <text x="16" y="28" class="card-title">Source Status Legend</text>
-    <circle cx="22" cy="52" r="6" class="legend-ok"/>
-    <text x="38" y="57" class="tiny">success</text>
-    <circle cx="22" cy="76" r="6" class="legend-warn"/>
-    <text x="38" y="81" class="tiny">blocked / warnings</text>
-    <circle cx="22" cy="100" r="6" class="legend-bad"/>
-    <text x="38" y="105" class="tiny">error</text>
-    <circle cx="22" cy="124" r="6" class="legend-skip"/>
-    <text x="38" y="129" class="tiny">skipped (disabled source)</text>
-  </g>
 </svg>

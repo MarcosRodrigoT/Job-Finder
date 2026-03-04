@@ -6,13 +6,23 @@ JobFinder crawls public job pages, normalizes postings into a single schema, sco
 
 ## What Is Implemented
 
-- Bundle A adapters (public-only):
-  - LinkedIn guest search (best effort)
+- Public-source adapters (API-first with HTML fallback where possible):
+  - LinkedIn (guest search, best effort)
+  - Amazon Jobs
+  - Meta Careers
+  - Google Careers
   - DeepMind (Greenhouse)
+  - Microsoft Careers
+  - Adobe Careers
+  - Stability AI Careers
   - Hugging Face (Workable)
-  - Mistral (Lever)
-  - OpenAI Careers (best effort; can return 403)
+  - NVIDIA Careers
+  - Apple Jobs
+  - IBM Careers
+  - OpenAI Careers
   - Anthropic Careers
+  - Mistral (Lever)
+  - Runway Careers
 - LangGraph workflow with 12 explicit nodes from profile load to run finalization.
 - Hybrid ranking:
   - rule score
@@ -34,11 +44,11 @@ JobFinder crawls public job pages, normalizes postings into a single schema, sco
 
 ## Architecture
 
-![Architecture Overview](docs/images/architecture-overview.svg)
-
-![LangGraph Pipeline](docs/images/langgraph-pipeline.svg)
-
-![Storage Map](docs/images/data-storage-map.svg)
+| | |
+|---|---|
+| ![Architecture Overview](docs/images/architecture-overview.svg) | System components and data flow |
+| ![LangGraph Pipeline](docs/images/langgraph-pipeline.svg) | 12-node workflow execution |
+| ![Storage Map](docs/images/data-storage-map.svg) | Database schema and file artifacts |
 
 ## Project Structure
 
@@ -111,76 +121,14 @@ uv run jobfinder serve --host 127.0.0.1 --port 8765
 
 Open `http://127.0.0.1:8765`.
 
-## Step-by-Step: How One Run Works
+## Scoring
 
-Implementation: `src/jobfinder/graph/workflow.py`
+`total = rule×0.35 + semantic×0.30 + llm×0.35`
 
-1. `load_profile`
-- Loads selected profile.
-- Creates `runs` row and stores profile snapshot.
-
-2. `expand_queries`
-- Expands role/location terms from profile fields.
-
-3. `fetch_sources_parallel`
-- Executes adapter fetches concurrently.
-- Captures per-source status (`success`, `blocked`, `error`, `skipped`).
-
-4. `normalize_records`
-- Saves raw payload snapshot (`data/raw/...json.gz`).
-- Normalizes each posting to canonical schema.
-
-5. `deduplicate_and_upsert`
-- Upserts canonical job rows and version history.
-- Applies dedup/alert policy (default 90 days).
-
-6. `rule_filter`
-- Computes deterministic pre-score.
-- Keeps candidate set for semantic/LLM stages.
-
-7. `embedding_score`
-- Computes semantic relevance using Ollama embedding model + FAISS.
-
-8. `llm_fit_score`
-- Calls Ollama chat model for structured fit scoring.
-
-9. `rank_and_select`
-- Combines rule + semantic + llm.
-- Applies freshness bonus.
-- Sorts and selects top digest jobs.
-
-10. `persist_outputs`
-- Stores source statuses + score rows.
-
-11. `generate_digest`
-- Writes report files:
-  - `data/reports/YYYY-MM-DD/<run_id>.md`
-  - `data/reports/YYYY-MM-DD/<run_id>.json`
-
-12. `finalize_run_status`
-- Final status logic:
-  - `failed` only if all sources failed/blocked/skipped.
-  - otherwise `completed`, `completed_with_warnings`, or `completed_with_errors`.
-
-## Scoring Model
-
-Default profile weights (`config/search_profiles.yaml`):
-
-- `rule`: `0.35`
-- `semantic`: `0.30`
-- `llm`: `0.35`
-
-Formula:
-
-```text
-total = rule*0.35 + semantic*0.30 + llm*0.35
-```
-
-Notes:
-
-- Rule scoring emphasizes title/location/skills overlap.
-- LLM fit has components: role, research, location, seniority.
-- Freshness bonus is applied in ranking for recent postings.
+- **Rule (35%):** title, location, skills heuristics
+- **Semantic (30%):** Ollama embeddings + FAISS cosine similarity
+- **LLM (35%):** Ollama chat model — role, research, location, seniority fit
+- **Freshness bonus** applied in `rank_and_select` for recent postings
 
 ## Configuration
 
@@ -248,53 +196,14 @@ Prune old data:
 uv run jobfinder prune --days 180
 ```
 
-## Dashboard Guide
+## Dashboard
 
-Implementation: `src/jobfinder/streamlit_app.py`
+```bash
+uv run jobfinder serve --host 127.0.0.1 --port 8765
+```
 
-Main UI sections:
-
-- Sidebar filters:
-  - run id
-  - text query (title/company/location)
-  - minimum score
-  - source filter
-  - new alerts only
-  - sort mode
-- KPI row:
-  - matched jobs
-  - new alerts
-  - median score
-  - remote share
-- Analytics charts:
-  - source contribution
-  - score distribution
-- Ranked list pane (left):
-  - full list in a scrollable panel
-  - one-click job selection
-- Detail pane (right):
-  - source URL, seen timestamps, score breakdown
-  - latest snapshot metadata
-  - description rendered as preserved plain text or HTML
-
-## Data Model and Outputs
-
-### SQLite core tables
-
-- `runs`
-- `run_source_status`
-- `jobs`
-- `job_versions`
-- `alerts`
-- `job_scores`
-- `profile_snapshots`
-
-### File artifacts
-
-- `data/raw/YYYY/MM/DD/*.json.gz`
-- `data/index/faiss/<run_id>/`
-- `data/reports/YYYY-MM-DD/<run_id>.md`
-- `data/reports/YYYY-MM-DD/<run_id>.json`
+Sidebar filters: run ID, text search, min score, source, new alerts only, sort mode.
+Main view: KPI row → source/score charts → ranked job list → job detail with score breakdown and description.
 
 ## Testing
 
@@ -351,7 +260,7 @@ systemctl --user list-timers | grep jobfinder
 
 ## Roadmap Ideas
 
-- Add additional sources (Amazon, Google, Microsoft, NVIDIA, Apple, IBM, etc.).
+- Add source-specific pagination and API parsers for higher recall on JS-heavy career sites.
 - Add incremental crawling and source-specific freshness tracking.
 - Add export connectors (Notion/Sheets/Slack/email).
 - Add per-company black/whitelist and stronger skill matching.

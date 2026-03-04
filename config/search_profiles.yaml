@@ -25,11 +25,21 @@ profiles:
     location_policy: "madrid_or_spain_remote"
     source_enabled:
       linkedin: true
+      amazon: true
+      meta: true
+      google: true
       greenhouse_deepmind: true
+      microsoft: true
+      adobe: true
+      stability_ai: true
       workable_huggingface: true
+      nvidia: true
+      apple: true
+      ibm: true
       lever_mistral: true
       openai: true
       anthropic: true
+      runwayml: true
     scoring_weights:
       rule: 0.35
       semantic: 0.30
