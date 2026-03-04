@@ -405,7 +405,7 @@ def _source_contribution_chart(source_counts: Counter[str]) -> None:
         .configure_axis(labelColor="#24415D", titleColor="#24415D", gridColor="#D6E4F2")
         .configure_legend(labelColor="#24415D", titleColor="#24415D")
     )
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width='stretch')
 
 
 def _score_distribution_chart(scores: list[float]) -> None:
@@ -444,7 +444,7 @@ def _score_distribution_chart(scores: list[float]) -> None:
         .configure_axis(labelColor="#24415D", titleColor="#24415D", gridColor="#D6E4F2")
         .configure_legend(labelColor="#24415D", titleColor="#24415D")
     )
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width='stretch')
 
 
 def main() -> None:
@@ -596,7 +596,7 @@ def main() -> None:
                     ),
                     unsafe_allow_html=True,
                 )
-                if st.button("👁️ View Details", key=f"open-job-{job_id}", use_container_width=True):
+                if st.button("👁️ View Details", key=f"open-job-{job_id}", width='stretch'):
                     st.session_state.selected_job_id = job_id
 
     with right:
