@@ -4,6 +4,7 @@ After=network-online.target
 
 [Service]
 Type=oneshot
+User=mrt
 WorkingDirectory=/home/mrt/Projects/Agents/Job-Finder
 EnvironmentFile=/home/mrt/Projects/Agents/Job-Finder/.env
 ExecStart=/home/mrt/.local/bin/uv run jobfinder run --profile madrid_ml
