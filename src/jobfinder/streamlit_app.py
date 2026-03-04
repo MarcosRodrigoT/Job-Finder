@@ -468,16 +468,14 @@ def main() -> None:
         """,
         unsafe_allow_html=True,
     )
-    st.caption(f"Config: {args.config}")
-
     if not runs:
         st.warning("No runs found yet. Execute: `uv run jobfinder run --profile madrid_ml`")
         return
 
+    selected_run = runs[0].id
+
     with st.sidebar:
         st.header("⚙️ Control Panel")
-        run_ids = [run.id for run in runs]
-        selected_run = st.selectbox("🗂️ Run ID", run_ids, index=0)
         query = st.text_input("🔎 Search title/company/location", "")
         min_score = st.slider("🎯 Minimum score", 0.0, 100.0, 0.0, 0.5)
         only_new = st.checkbox("🚨 Only new alerts", value=False)
@@ -487,7 +485,8 @@ def main() -> None:
 
     sources = sorted({str(row["source"]) for row in ranked_rows})
     with st.sidebar:
-        selected_sources = st.multiselect("🛰️ Sources", sources, default=sources)
+        with st.expander("🛰️ Sources", expanded=True):
+            selected_sources = [src for src in sources if st.checkbox(src, value=True, key=f"src_{src}")]
 
     filtered = []
     needle = query.strip().lower()
@@ -591,7 +590,7 @@ def main() -> None:
                         "<div class='job-card'>"
                         f"<h4>{emoji} {idx}. {html.escape(str(row['title']))}</h4>"
                         f"<div class='meta'>🏢 {html.escape(str(row['company']))} | 📍 {html.escape(str(row['location_text']))}</div>"
-                        f"<div class='meta'>🎯 score={score:.2f} | {alert_icon} new_alert={bool(row['is_new_alert'])}</div>"
+                        f"<div class='meta'>🎯 {score:.2f} | {alert_icon}</div>"
                         "</div>"
                     ),
                     unsafe_allow_html=True,
@@ -618,16 +617,16 @@ def main() -> None:
         st.caption(f"🏢 {job.company} · 📍 {job.location_text}")
 
         st.markdown(
-            f"[🔗 Open Source Link]({job.url}) · source=`{job.source}` · "
-            f"first_seen=`{_fmt_dt(job.first_seen_at)}` · last_seen=`{_fmt_dt(job.last_seen_at)}`"
+            f"[🔗 Open Source Link]({job.url}) · via `{job.source}` · "
+            f"first seen **{_fmt_dt(job.first_seen_at)}** · last seen **{_fmt_dt(job.last_seen_at)}**"
         )
 
         if selected_row is not None:
-            st.write(
-                f"🎯 total={float(selected_row['total_score']):.2f} "
-                f"(rule={float(selected_row['rule_score']):.2f}, "
-                f"semantic={float(selected_row['semantic_score']):.2f}, "
-                f"llm={float(selected_row['llm_score']):.2f})"
+            st.markdown(
+                f"🎯 **{float(selected_row['total_score']):.2f}** "
+                f"(rule: **{float(selected_row['rule_score']):.2f}** · "
+                f"semantic: **{float(selected_row['semantic_score']):.2f}** · "
+                f"llm: **{float(selected_row['llm_score']):.2f}**)"
             )
 
         st.markdown("### 📄 Latest Snapshot")
