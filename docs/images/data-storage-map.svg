@@ -1,76 +1,152 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="860" viewBox="0 0 1380 860" role="img" aria-labelledby="title desc">
-  <title id="title">Data and Storage Map</title>
-  <desc id="desc">Database tables and filesystem outputs produced by JobFinder runs.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1140" viewBox="0 0 1700 1140" role="img" aria-labelledby="title desc">
+  <title id="title">JobFinder Data Storage Map</title>
+  <desc id="desc">Detailed schema and filesystem map for JobFinder including table roles, relationships, and consumption paths.</desc>
+
   <defs>
-    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f8fbff"/>
-      <stop offset="100%" stop-color="#eaf2ff"/>
-    </linearGradient>
     <style><![CDATA[
-      .h1 { font: 700 32px 'Segoe UI', Arial, sans-serif; fill: #15365c; }
-      .h2 { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #173f6b; }
-      .txt { font: 500 14px 'Segoe UI', Arial, sans-serif; fill: #234d7b; }
-      .arrow { stroke: #2d649f; stroke-width: 2.8; fill: none; marker-end: url(#ah3); }
+      .title { font: 700 40px 'Segoe UI', Arial, sans-serif; fill: #102944; }
+      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #3a5877; }
+      .section-title { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #173a5e; }
+      .table-title { font: 700 17px 'Segoe UI', Arial, sans-serif; fill: #163353; }
+      .text { font: 500 13px 'Segoe UI', Arial, sans-serif; fill: #2f4f6d; }
+      .small { font: 500 12px 'Segoe UI', Arial, sans-serif; fill: #486884; }
+      .panel-left { fill: #f6fbff; stroke: #a5c6e2; stroke-width: 2; }
+      .panel-right { fill: #f9fff8; stroke: #a9cfbe; stroke-width: 2; }
+      .panel-bottom { fill: #fffaf4; stroke: #dbc29c; stroke-width: 2; }
+      .card { fill: #ffffff; stroke: #bfd1e1; stroke-width: 1.6; }
+      .card-green { fill: #ffffff; stroke: #b9d8c7; stroke-width: 1.6; }
+      .arrow { stroke: #3f729d; stroke-width: 2.8; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke-dasharray: 8 6; }
+      .mono { font: 500 12px 'Consolas', 'Liberation Mono', monospace; fill: #345573; }
     ]]></style>
-    <marker id="ah3" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#2d649f"/>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#3f729d"/>
     </marker>
   </defs>
 
-  <rect width="1380" height="860" fill="url(#bg3)"/>
-  <text x="46" y="62" class="h1">Persistence Layout</text>
+  <text x="44" y="58" class="title">Persistence Topology: Database + Filesystem</text>
+  <text x="44" y="90" class="subtitle">How run data is stored, versioned, queried, and pruned in JobFinder</text>
 
-  <rect x="46" y="104" width="620" height="700" rx="18" fill="#ffffff" stroke="#79a4d8" stroke-width="2"/>
-  <text x="70" y="142" class="h2">SQLite (`data/jobfinder.sqlite`)</text>
+  <rect x="34" y="118" width="940" height="714" rx="14" class="panel-left"/>
+  <text x="54" y="150" class="section-title">A. SQLite Schema (`data/jobfinder.sqlite`)</text>
 
-  <rect x="76" y="176" width="560" height="84" rx="10" fill="#f4f9ff" stroke="#9bc0eb"/>
-  <text x="96" y="208" class="txt">runs: one row per execution, status + timing metadata</text>
-  <text x="96" y="231" class="txt">run_source_status: source-level health and counts</text>
+  <rect x="56" y="174" width="280" height="162" rx="10" class="card"/>
+  <text x="74" y="202" class="table-title">runs</text>
+  <text x="74" y="224" class="text">PK: id (run_id)</text>
+  <text x="74" y="244" class="text">profile_id, started_at, completed_at</text>
+  <text x="74" y="264" class="text">status, warning_count, error_count</text>
+  <text x="74" y="286" class="small">One row per execution</text>
 
-  <rect x="76" y="280" width="560" height="104" rx="10" fill="#f4f9ff" stroke="#9bc0eb"/>
-  <text x="96" y="312" class="txt">jobs: canonical current view per source/source_job_id</text>
-  <text x="96" y="335" class="txt">job_versions: history by content_hash + raw snapshot pointer</text>
-  <text x="96" y="358" class="txt">alerts: unseen postings within dedup window policy</text>
+  <rect x="356" y="174" width="280" height="162" rx="10" class="card"/>
+  <text x="374" y="202" class="table-title">run_source_status</text>
+  <text x="374" y="224" class="text">FK: run_id -> runs.id</text>
+  <text x="374" y="244" class="text">source, status</text>
+  <text x="374" y="264" class="text">fetched_count, normalized_count</text>
+  <text x="374" y="286" class="text">error message (nullable)</text>
 
-  <rect x="76" y="404" width="560" height="104" rx="10" fill="#f4f9ff" stroke="#9bc0eb"/>
-  <text x="96" y="436" class="txt">job_scores: rule/semantic/llm/total + rationale per run</text>
-  <text x="96" y="459" class="txt">profile_snapshots: immutable profile config used for run</text>
+  <rect x="656" y="174" width="296" height="162" rx="10" class="card"/>
+  <text x="674" y="202" class="table-title">profile_snapshots</text>
+  <text x="674" y="224" class="text">FK: run_id -> runs.id</text>
+  <text x="674" y="244" class="text">serialized profile used for run</text>
+  <text x="674" y="264" class="text">ensures report reproducibility</text>
+  <text x="674" y="286" class="small">Immutable config capture</text>
 
-  <rect x="76" y="528" width="560" height="250" rx="10" fill="#f4f9ff" stroke="#9bc0eb"/>
-  <text x="96" y="560" class="txt">Main query paths used by UI/CLI:</text>
-  <text x="96" y="588" class="txt">• latest run → source statuses → ranked jobs</text>
-  <text x="96" y="614" class="txt">• run detail page (`/runs/{run_id}`)</text>
-  <text x="96" y="640" class="txt">• job detail page (`/jobs/{job_id}`) + latest version</text>
-  <text x="96" y="666" class="txt">• report regeneration by profile/latest run</text>
-  <text x="96" y="692" class="txt">• prune old runs/scores/alerts by retention window</text>
+  <rect x="56" y="360" width="280" height="206" rx="10" class="card"/>
+  <text x="74" y="388" class="table-title">jobs</text>
+  <text x="74" y="410" class="text">PK: id</text>
+  <text x="74" y="430" class="text">unique(source, source_job_id)</text>
+  <text x="74" y="450" class="text">title, company, location_text</text>
+  <text x="74" y="470" class="text">url, is_remote</text>
+  <text x="74" y="490" class="text">first_seen_at, last_seen_at</text>
+  <text x="74" y="512" class="small">Current canonical row per posting</text>
 
-  <rect x="714" y="104" width="620" height="700" rx="18" fill="#ffffff" stroke="#79a4d8" stroke-width="2"/>
-  <text x="738" y="142" class="h2">Filesystem Artifacts</text>
+  <rect x="356" y="360" width="280" height="206" rx="10" class="card"/>
+  <text x="374" y="388" class="table-title">job_versions</text>
+  <text x="374" y="410" class="text">FK: job_id -> jobs.id</text>
+  <text x="374" y="430" class="text">content_hash, posted_at</text>
+  <text x="374" y="450" class="text">description_text, employment_type</text>
+  <text x="374" y="470" class="text">seniority, raw_snapshot_id</text>
+  <text x="374" y="490" class="text">observed_at</text>
+  <text x="374" y="512" class="small">History for content change tracking</text>
 
-  <rect x="744" y="176" width="560" height="112" rx="10" fill="#f7fff8" stroke="#8ec8a0"/>
-  <text x="764" y="208" class="txt">data/raw/YYYY/MM/DD/*.json.gz</text>
-  <text x="764" y="231" class="txt">Compact immutable raw payload snapshots per fetched posting</text>
-  <text x="764" y="254" class="txt">Referenced by `raw_snapshot_id` in job_versions</text>
+  <rect x="656" y="360" width="296" height="206" rx="10" class="card"/>
+  <text x="674" y="388" class="table-title">alerts</text>
+  <text x="674" y="410" class="text">FK: job_id -> jobs.id</text>
+  <text x="674" y="430" class="text">FK: run_id -> runs.id</text>
+  <text x="674" y="450" class="text">is_new_alert, created_at</text>
+  <text x="674" y="472" class="text">dedup window policy (default 90d)</text>
+  <text x="674" y="500" class="table-title">job_scores</text>
+  <text x="674" y="522" class="text">FK: run_id, FK: job_id</text>
+  <text x="674" y="542" class="text">rule, semantic, llm, total, rationale</text>
 
-  <rect x="744" y="308" width="560" height="112" rx="10" fill="#f7fff8" stroke="#8ec8a0"/>
-  <text x="764" y="340" class="txt">data/index/faiss/{run_id}/</text>
-  <text x="764" y="363" class="txt">Per-run FAISS index persisted from semantic scoring stage</text>
-  <text x="764" y="386" class="txt">Supports reproducibility and debugging relevance</text>
+  <rect x="56" y="588" width="896" height="224" rx="10" class="card"/>
+  <text x="74" y="616" class="table-title">Common Query Paths</text>
+  <text x="74" y="640" class="text">- Latest run list for sidebar selector</text>
+  <text x="74" y="662" class="text">- Ranked jobs by run_id with filters (source/text/score/new_alert)</text>
+  <text x="74" y="684" class="text">- Job detail + latest version for description rendering</text>
+  <text x="74" y="706" class="text">- Report regeneration from persisted rows (without recrawl)</text>
+  <text x="74" y="728" class="text">- Pruning old runs/scores/alerts based on retention days</text>
+  <text x="74" y="758" class="mono">Repository API: list_runs(), get_ranked_jobs(), get_job(), get_latest_job_version(), prune()</text>
 
-  <rect x="744" y="440" width="560" height="132" rx="10" fill="#f7fff8" stroke="#8ec8a0"/>
-  <text x="764" y="472" class="txt">data/reports/YYYY-MM-DD/{run_id}.md</text>
-  <text x="764" y="495" class="txt">Human digest: source health + top ranked jobs + rationale</text>
-  <text x="764" y="518" class="txt">data/reports/YYYY-MM-DD/{run_id}.json</text>
-  <text x="764" y="541" class="txt">Machine-readable run/report payload</text>
+  <rect x="1008" y="118" width="658" height="714" rx="14" class="panel-right"/>
+  <text x="1028" y="150" class="section-title">B. Filesystem Artifacts</text>
 
-  <rect x="744" y="592" width="560" height="186" rx="10" fill="#f7fff8" stroke="#8ec8a0"/>
-  <text x="764" y="624" class="txt">Operational files</text>
-  <text x="764" y="650" class="txt">• config/search_profiles.yaml</text>
-  <text x="764" y="674" class="txt">• .env (`JOBFINDER_*`)</text>
-  <text x="764" y="698" class="txt">• systemd/jobfinder.service + jobfinder.timer</text>
-  <text x="764" y="722" class="txt">• README, tests, and web templates/static assets</text>
+  <rect x="1030" y="176" width="614" height="176" rx="10" class="card-green"/>
+  <text x="1048" y="204" class="table-title">Raw Snapshots</text>
+  <text x="1048" y="228" class="mono">data/raw/YYYY/MM/DD/*.json.gz</text>
+  <text x="1048" y="250" class="text">Saved during normalize_records for each successfully fetched raw posting.</text>
+  <text x="1048" y="272" class="text">Referenced from `job_versions.raw_snapshot_id` for traceability.</text>
+  <text x="1048" y="294" class="text">Used for parser debugging and future re-normalization.</text>
 
-  <path class="arrow" d="M636 318 L744 232"/>
-  <path class="arrow" d="M636 458 L744 364"/>
-  <path class="arrow" d="M636 590 L744 506"/>
+  <rect x="1030" y="370" width="614" height="176" rx="10" class="card-green"/>
+  <text x="1048" y="398" class="table-title">Vector Index Artifacts</text>
+  <text x="1048" y="422" class="mono">data/index/faiss/&lt;run_id&gt;/</text>
+  <text x="1048" y="444" class="text">Generated during embedding_score.</text>
+  <text x="1048" y="466" class="text">Captures semantic embedding index used for that run's ranking context.</text>
+  <text x="1048" y="488" class="text">Supports diagnostics and consistency checks.</text>
+
+  <rect x="1030" y="564" width="614" height="248" rx="10" class="card-green"/>
+  <text x="1048" y="592" class="table-title">Digest Reports</text>
+  <text x="1048" y="616" class="mono">data/reports/YYYY-MM-DD/&lt;run_id&gt;.md</text>
+  <text x="1048" y="638" class="mono">data/reports/YYYY-MM-DD/&lt;run_id&gt;.json</text>
+  <text x="1048" y="662" class="text">Generated in generate_digest node.</text>
+  <text x="1048" y="684" class="text">Markdown is human-readable summary; JSON is automation-friendly payload.</text>
+  <text x="1048" y="706" class="text">CLI prints both paths for direct access.</text>
+  <text x="1048" y="728" class="text">Prune command deletes old reports by retention threshold.</text>
+  <text x="1048" y="750" class="small">System-level operational files: `.env`, `config/search_profiles.yaml`, `systemd/*.service|*.timer`</text>
+
+  <rect x="34" y="860" width="1632" height="250" rx="14" class="panel-bottom"/>
+  <text x="54" y="892" class="section-title">C. Data Flow and Consumption</text>
+
+  <rect x="56" y="916" width="520" height="170" rx="10" class="card"/>
+  <text x="74" y="944" class="table-title">CLI and Reports</text>
+  <text x="74" y="968" class="text">`jobfinder run` writes DB + files, then prints summary metrics.</text>
+  <text x="74" y="990" class="text">`jobfinder report` rebuilds digest from DB state for a chosen run.</text>
+  <text x="74" y="1012" class="text">`jobfinder crawl` keeps same persistence model without expensive scoring.</text>
+
+  <rect x="604" y="916" width="520" height="170" rx="10" class="card"/>
+  <text x="622" y="944" class="table-title">Streamlit Dashboard Reads</text>
+  <text x="622" y="968" class="text">- list of runs (recent history)</text>
+  <text x="622" y="990" class="text">- ranked jobs with score columns and alert flags</text>
+  <text x="622" y="1012" class="text">- selected job metadata + latest snapshot description</text>
+
+  <rect x="1152" y="916" width="492" height="170" rx="10" class="card"/>
+  <text x="1170" y="944" class="table-title">Retention and Lifecycle</text>
+  <text x="1170" y="968" class="text">`jobfinder prune --days N` removes stale rows and files.</text>
+  <text x="1170" y="990" class="text">Defaults from `JOBFINDER_RETENTION_DAYS` (180).</text>
+  <text x="1170" y="1012" class="text">Canonical jobs remain accurate across repeated runs.</text>
+
+  <path class="arrow" d="M336 258 L356 258"/>
+  <path class="arrow" d="M636 258 L656 258"/>
+  <path class="arrow" d="M196 566 L196 588"/>
+  <path class="arrow" d="M496 566 L496 588"/>
+  <path class="arrow" d="M804 566 L804 588"/>
+
+  <path class="arrow" d="M952 278 L1030 256"/>
+  <path class="arrow" d="M952 456 L1030 448"/>
+  <path class="arrow" d="M952 700 L1030 680"/>
+
+  <path class="arrow dashed" d="M288 812 L288 916"/>
+  <path class="arrow dashed" d="M864 812 L864 916"/>
+  <path class="arrow dashed" d="M1340 812 L1340 916"/>
 </svg>

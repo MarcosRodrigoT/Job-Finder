@@ -1,115 +1,179 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="740" viewBox="0 0 1680 740" role="img" aria-labelledby="title desc">
-  <title id="title">LangGraph Pipeline Nodes</title>
-  <desc id="desc">Pipeline sequence from loading profile to finalizing run status.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="1320" viewBox="0 0 1780 1320" role="img" aria-labelledby="title desc">
+  <title id="title">LangGraph Pipeline Detailed Flow</title>
+  <desc id="desc">Detailed node-by-node execution flow for JobFinder workflow including state transitions, persistence points, and failure semantics.</desc>
+
   <defs>
-    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f1f8ff"/>
-      <stop offset="100%" stop-color="#deecff"/>
-    </linearGradient>
     <style><![CDATA[
-      .header { font: 700 32px 'Segoe UI', Arial, sans-serif; fill: #10335b; }
-      .sub { font: 500 17px 'Segoe UI', Arial, sans-serif; fill: #32557f; }
-      .node-title { font: 700 14px 'Segoe UI', Arial, sans-serif; fill: #11355e; }
-      .node-desc { font: 500 12px 'Segoe UI', Arial, sans-serif; fill: #2b547f; }
-      .arrow { stroke: #2f659e; stroke-width: 2.5; fill: none; marker-end: url(#ah); }
+      .title { font: 700 40px 'Segoe UI', Arial, sans-serif; fill: #0f2b46; }
+      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #3b5876; }
+      .lane { fill: #f7fbff; stroke: #a8c6e1; stroke-width: 2; }
+      .lane2 { fill: #f7fffb; stroke: #a7d0be; stroke-width: 2; }
+      .lane3 { fill: #fffaf4; stroke: #dbc09b; stroke-width: 2; }
+      .lane4 { fill: #f9f7ff; stroke: #c0b3df; stroke-width: 2; }
+      .node { fill: #ffffff; stroke: #b5c9dc; stroke-width: 1.8; }
+      .node-io { fill: #f5f9ff; stroke: #c8d8e8; stroke-width: 1.4; }
+      .node-title { font: 700 17px 'Segoe UI', Arial, sans-serif; fill: #183453; }
+      .node-text { font: 500 13px 'Segoe UI', Arial, sans-serif; fill: #345470; }
+      .lane-title { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #173a5d; }
+      .small { font: 500 12px 'Segoe UI', Arial, sans-serif; fill: #496783; }
+      .arrow { stroke: #3f739f; stroke-width: 2.8; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke-dasharray: 8 6; }
+      .warn { fill: #fff4e9; stroke: #d9a96f; stroke-width: 1.6; }
     ]]></style>
-    <marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-      <polygon points="0 0, 10 4, 0 8" fill="#2f659e"/>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#3f739f"/>
     </marker>
   </defs>
 
-  <rect width="1680" height="740" fill="url(#bg2)"/>
-  <text x="50" y="62" class="header">LangGraph Execution Flow</text>
-  <text x="50" y="92" class="sub">Exact node order used by `JobFinderWorkflow`</text>
+  <text x="46" y="60" class="title">LangGraph Workflow: Node-Level Execution</text>
+  <text x="46" y="92" class="subtitle">`src/jobfinder/graph/workflow.py` - deterministic 12-node graph with explicit state transitions</text>
 
-  <g transform="translate(50,130)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
-    <text x="16" y="28" class="node-title">1. load_profile</text>
-    <text x="16" y="50" class="node-desc">start run + snapshot profile</text>
-  </g>
+  <rect x="36" y="116" width="1708" height="204" rx="14" class="lane"/>
+  <text x="56" y="148" class="lane-title">Phase A: Run Setup and Source Fetching</text>
 
-  <g transform="translate(310,130)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
-    <text x="16" y="28" class="node-title">2. expand_queries</text>
-    <text x="16" y="50" class="node-desc">roles + locations terms</text>
-  </g>
+  <rect x="58" y="170" width="256" height="128" rx="12" class="node"/>
+  <text x="76" y="198" class="node-title">1. load_profile</text>
+  <text x="76" y="220" class="node-text">- persist run start</text>
+  <text x="76" y="240" class="node-text">- snapshot profile config</text>
+  <text x="76" y="260" class="node-text">- initialize state containers</text>
 
-  <g transform="translate(570,130)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
-    <text x="16" y="28" class="node-title">3. fetch_sources_parallel</text>
-    <text x="16" y="50" class="node-desc">parallel adapter fetch</text>
-  </g>
+  <rect x="346" y="170" width="256" height="128" rx="12" class="node"/>
+  <text x="364" y="198" class="node-title">2. expand_queries</text>
+  <text x="364" y="220" class="node-text">- merge target roles + synonyms</text>
+  <text x="364" y="240" class="node-text">- append location terms</text>
+  <text x="364" y="260" class="node-text">- de-duplicate query list</text>
 
-  <g transform="translate(830,130)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
-    <text x="16" y="28" class="node-title">4. normalize_records</text>
-    <text x="16" y="50" class="node-desc">save raw snapshot + normalize</text>
-  </g>
+  <rect x="634" y="170" width="324" height="128" rx="12" class="node"/>
+  <text x="652" y="198" class="node-title">3. fetch_sources_parallel</text>
+  <text x="652" y="220" class="node-text">- concurrent adapter fetch with HTTPX</text>
+  <text x="652" y="240" class="node-text">- source status: success/error/blocked/skipped</text>
+  <text x="652" y="260" class="node-text">- capture warnings per source</text>
 
-  <g transform="translate(1090,130)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
-    <text x="16" y="28" class="node-title">5. deduplicate_and_upsert</text>
-    <text x="16" y="50" class="node-desc">SQLite upsert + alert policy</text>
-  </g>
+  <rect x="990" y="170" width="324" height="128" rx="12" class="node"/>
+  <text x="1008" y="198" class="node-title">4. normalize_records</text>
+  <text x="1008" y="220" class="node-text">- save raw payload snapshots (.json.gz)</text>
+  <text x="1008" y="240" class="node-text">- map source payload -> normalized model</text>
+  <text x="1008" y="260" class="node-text">- update per-source normalized counters</text>
 
-  <g transform="translate(1350,130)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#7ea6d8"/>
-    <text x="16" y="28" class="node-title">6. rule_filter</text>
-    <text x="16" y="50" class="node-desc">keyword/location pre-score</text>
-  </g>
+  <rect x="1346" y="170" width="374" height="128" rx="12" class="node"/>
+  <text x="1364" y="198" class="node-title">5. deduplicate_and_upsert</text>
+  <text x="1364" y="220" class="node-text">- upsert canonical jobs + versions</text>
+  <text x="1364" y="240" class="node-text">- evaluate dedup window (default 90 days)</text>
+  <text x="1364" y="260" class="node-text">- mark new alerts only when unseen</text>
 
-  <g transform="translate(50,330)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
-    <text x="16" y="28" class="node-title">7. embedding_score</text>
-    <text x="16" y="50" class="node-desc">FAISS semantic relevance</text>
-  </g>
+  <rect x="36" y="344" width="1708" height="214" rx="14" class="lane2"/>
+  <text x="56" y="376" class="lane-title">Phase B: Candidate Filtering and Scoring</text>
 
-  <g transform="translate(310,330)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
-    <text x="16" y="28" class="node-title">8. llm_fit_score</text>
-    <text x="16" y="50" class="node-desc">Ollama structured fit scoring</text>
-  </g>
+  <rect x="58" y="400" width="274" height="138" rx="12" class="node"/>
+  <text x="76" y="428" class="node-title">6. rule_filter</text>
+  <text x="76" y="450" class="node-text">- deterministic title/location/skill scoring</text>
+  <text x="76" y="470" class="node-text">- keeps candidates (threshold 10)</text>
+  <text x="76" y="490" class="node-text">- fallback to all normalized jobs if empty</text>
 
-  <g transform="translate(570,330)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
-    <text x="16" y="28" class="node-title">9. rank_and_select</text>
-    <text x="16" y="50" class="node-desc">weighted rank + freshness</text>
-  </g>
+  <rect x="364" y="400" width="314" height="138" rx="12" class="node"/>
+  <text x="382" y="428" class="node-title">7. embedding_score</text>
+  <text x="382" y="450" class="node-text">- crawl_only: semantic score = 0</text>
+  <text x="382" y="470" class="node-text">- else Ollama embed model + FAISS</text>
+  <text x="382" y="490" class="node-text">- persist per-run FAISS index artifacts</text>
 
-  <g transform="translate(830,330)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
-    <text x="16" y="28" class="node-title">10. persist_outputs</text>
-    <text x="16" y="50" class="node-desc">source status + score rows</text>
-  </g>
+  <rect x="710" y="400" width="314" height="138" rx="12" class="node"/>
+  <text x="728" y="428" class="node-title">8. llm_fit_score</text>
+  <text x="728" y="450" class="node-text">- crawl_only: synthetic fit rationale</text>
+  <text x="728" y="470" class="node-text">- else Ollama chat fit evaluation</text>
+  <text x="728" y="490" class="node-text">- role/research/location/seniority fields</text>
 
-  <g transform="translate(1090,330)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
-    <text x="16" y="28" class="node-title">11. generate_digest</text>
-    <text x="16" y="50" class="node-desc">write markdown + JSON</text>
-  </g>
+  <rect x="1056" y="400" width="314" height="138" rx="12" class="node"/>
+  <text x="1074" y="428" class="node-title">9. rank_and_select</text>
+  <text x="1074" y="450" class="node-text">- combine weighted rule/semantic/llm</text>
+  <text x="1074" y="470" class="node-text">- apply freshness bonus by posted_at</text>
+  <text x="1074" y="490" class="node-text">- sort + compute top digest set</text>
 
-  <g transform="translate(1350,330)">
-    <rect x="0" y="0" width="220" height="84" rx="12" fill="#fff" stroke="#71bf9c"/>
-    <text x="16" y="28" class="node-title">12. finalize_run_status</text>
-    <text x="16" y="50" class="node-desc">status + warnings/errors</text>
-  </g>
+  <rect x="1402" y="400" width="318" height="138" rx="12" class="node"/>
+  <text x="1420" y="428" class="node-title">Intermediate State Outputs</text>
+  <text x="1420" y="450" class="node-text">rule_scores, semantic_scores, llm_fits,</text>
+  <text x="1420" y="470" class="node-text">ranked_jobs, top_jobs, alert flags,</text>
+  <text x="1420" y="490" class="node-text">profile + source status context</text>
 
-  <path class="arrow" d="M270 172 L300 172"/>
-  <path class="arrow" d="M530 172 L560 172"/>
-  <path class="arrow" d="M790 172 L820 172"/>
-  <path class="arrow" d="M1050 172 L1080 172"/>
-  <path class="arrow" d="M1310 172 L1340 172"/>
+  <rect x="36" y="582" width="1708" height="236" rx="14" class="lane3"/>
+  <text x="56" y="614" class="lane-title">Phase C: Persistence and Reporting</text>
 
-  <path class="arrow" d="M1460 214 C1460 260 1460 290 1460 330"/>
-  <path class="arrow" d="M1350 372 L1320 372"/>
-  <path class="arrow" d="M1090 372 L1060 372"/>
-  <path class="arrow" d="M830 372 L800 372"/>
-  <path class="arrow" d="M570 372 L540 372"/>
-  <path class="arrow" d="M310 372 L280 372"/>
+  <rect x="58" y="638" width="324" height="154" rx="12" class="node"/>
+  <text x="76" y="666" class="node-title">10. persist_outputs</text>
+  <text x="76" y="688" class="node-text">- save run_source_status rows</text>
+  <text x="76" y="708" class="node-text">- save job_scores rows for ranked jobs</text>
+  <text x="76" y="728" class="node-text">- tie each score row to job + run</text>
+  <text x="76" y="748" class="node-text">- store new-alert metadata</text>
 
-  <rect x="50" y="510" width="1580" height="180" rx="16" fill="#ffffff" stroke="#7ea6d8" stroke-dasharray="7 6"/>
-  <text x="75" y="546" class="node-title">Failure Semantics</text>
-  <text x="75" y="575" class="node-desc">• Source errors are non-fatal and are tracked in `run_source_status`.</text>
-  <text x="75" y="600" class="node-desc">• LinkedIn block/CAPTCHA is explicitly marked as `blocked` and pipeline continues.</text>
-  <text x="75" y="625" class="node-desc">• Run becomes `failed` only when every source failed/blocked/skipped.</text>
+  <rect x="414" y="638" width="324" height="154" rx="12" class="node"/>
+  <text x="432" y="666" class="node-title">11. generate_digest</text>
+  <text x="432" y="688" class="node-text">- build markdown digest</text>
+  <text x="432" y="708" class="node-text">- build JSON digest</text>
+  <text x="432" y="728" class="node-text">- write file paths into RunResult</text>
+  <text x="432" y="748" class="node-text">- top_n = profile.digest_size</text>
+
+  <rect x="770" y="638" width="384" height="154" rx="12" class="node"/>
+  <text x="788" y="666" class="node-title">12. finalize_run_status</text>
+  <text x="788" y="688" class="node-text">- set completed timestamp</text>
+  <text x="788" y="708" class="node-text">- compute status: completed / warnings / errors / failed</text>
+  <text x="788" y="728" class="node-text">- fail only when no source succeeded</text>
+  <text x="788" y="748" class="node-text">- persist run completion summary</text>
+
+  <rect x="1186" y="638" width="534" height="154" rx="12" class="node-io"/>
+  <text x="1204" y="666" class="node-title">Artifacts Produced</text>
+  <text x="1204" y="688" class="node-text">- DB: runs, source statuses, jobs, versions, alerts, scores</text>
+  <text x="1204" y="708" class="node-text">- Files: raw snapshots, FAISS indices, md/json reports</text>
+  <text x="1204" y="728" class="node-text">- Streamlit UI reads latest persisted run data</text>
+  <text x="1204" y="748" class="node-text">- CLI prints run_id + report paths</text>
+
+  <rect x="36" y="844" width="1708" height="430" rx="14" class="lane4"/>
+  <text x="56" y="876" class="lane-title">Operational Semantics and Control Flags</text>
+
+  <rect x="58" y="898" width="540" height="168" rx="12" class="warn"/>
+  <text x="76" y="928" class="node-title">Failure Policy</text>
+  <text x="76" y="952" class="node-text">- Source-level errors are isolated and logged as warnings.</text>
+  <text x="76" y="974" class="node-text">- LinkedIn block/CAPTCHA -> status=blocked (non-fatal).</text>
+  <text x="76" y="996" class="node-text">- Run fails only if every enabled source produced no success.</text>
+  <text x="76" y="1018" class="node-text">- Missing embed model triggers semantic fallback warning.</text>
+  <text x="76" y="1040" class="node-text">- LLM parse issues are captured without crashing whole run.</text>
+
+  <rect x="628" y="898" width="540" height="168" rx="12" class="node-io"/>
+  <text x="646" y="928" class="node-title">crawl_only Mode</text>
+  <text x="646" y="952" class="node-text">- Invoked by `jobfinder crawl`.</text>
+  <text x="646" y="974" class="node-text">- Skips expensive semantic and chat-model scoring.</text>
+  <text x="646" y="996" class="node-text">- Uses zero semantic score + synthetic LLM rationale.</text>
+  <text x="646" y="1018" class="node-text">- Still normalizes, deduplicates, persists, and reports.</text>
+
+  <rect x="1198" y="898" width="522" height="168" rx="12" class="node-io"/>
+  <text x="1216" y="928" class="node-title">State Contract Highlights</text>
+  <text x="1216" y="952" class="node-text">- JobFinderState carries profile, run_result, and intermediate maps.</text>
+  <text x="1216" y="974" class="node-text">- fingerprint key = `source:source_job_id` across scoring maps.</text>
+  <text x="1216" y="996" class="node-text">- RunResult aggregates counts, warnings/errors, top jobs, report paths.</text>
+  <text x="1216" y="1018" class="node-text">- Used by CLI output and reporting module.</text>
+
+  <rect x="58" y="1088" width="1662" height="162" rx="12" class="node"/>
+  <text x="76" y="1118" class="node-title">Node Sequence</text>
+  <text x="76" y="1142" class="small">START -> load_profile -> expand_queries -> fetch_sources_parallel -> normalize_records -> deduplicate_and_upsert -> rule_filter -> embedding_score -> llm_fit_score -> rank_and_select -> persist_outputs -> generate_digest -> finalize_run_status -> END</text>
+  <text x="76" y="1170" class="small">The graph order is static and intentionally explicit for observability and easier debugging.</text>
+
+  <path class="arrow" d="M314 234 L346 234"/>
+  <path class="arrow" d="M602 234 L634 234"/>
+  <path class="arrow" d="M958 234 L990 234"/>
+  <path class="arrow" d="M1314 234 L1346 234"/>
+
+  <path class="arrow" d="M1532 298 C1532 338 1532 380 1532 400"/>
+  <path class="arrow" d="M58 470 L58 470"/>
+  <path class="arrow" d="M332 470 L364 470"/>
+  <path class="arrow" d="M678 470 L710 470"/>
+  <path class="arrow" d="M1024 470 L1056 470"/>
+  <path class="arrow" d="M1370 470 L1402 470"/>
+
+  <path class="arrow" d="M1561 538 C1561 590 1561 618 1561 638"/>
+  <path class="arrow" d="M382 716 L414 716"/>
+  <path class="arrow" d="M738 716 L770 716"/>
+  <path class="arrow" d="M1154 716 L1186 716"/>
+
+  <path class="arrow dashed" d="M328 792 L328 898"/>
+  <path class="arrow dashed" d="M900 792 L900 898"/>
+  <path class="arrow dashed" d="M1458 792 L1458 898"/>
+
 </svg>

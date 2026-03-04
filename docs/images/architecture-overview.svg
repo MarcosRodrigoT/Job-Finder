@@ -1,83 +1,166 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1080" viewBox="0 0 1700 1080" role="img" aria-labelledby="title desc">
   <title id="title">JobFinder Architecture Overview</title>
-  <desc id="desc">System architecture showing CLI, web UI, workflow engine, adapters, scoring, and storage.</desc>
+  <desc id="desc">Detailed architecture for JobFinder showing entry points, runtime services, source adapters, scoring, persistence, reporting, and Streamlit dashboard.</desc>
+
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#eef5ff"/>
-      <stop offset="100%" stop-color="#dce8ff"/>
-    </linearGradient>
     <style><![CDATA[
-      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #14345a; }
-      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #35557d; }
-      .box-title { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #0e2a47; }
-      .box-text { font: 500 15px 'Segoe UI', Arial, sans-serif; fill: #173c62; }
-      .lane-title { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #0f2f4f; }
-      .arrow { stroke: #2f5f96; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .title { font: 700 42px 'Segoe UI', Arial, sans-serif; fill: #0f2740; }
+      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #3d556f; }
+      .lane-title { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #173a5d; }
+      .card-title { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #16314f; }
+      .card-sub { font: 600 14px 'Segoe UI', Arial, sans-serif; fill: #345270; }
+      .card-text { font: 500 14px 'Segoe UI', Arial, sans-serif; fill: #2c4a68; }
+      .tiny { font: 500 12px 'Segoe UI', Arial, sans-serif; fill: #425f79; }
+      .panel-a { fill: #f6fbff; stroke: #9fc2df; stroke-width: 2; }
+      .panel-b { fill: #f8fffb; stroke: #98ccb4; stroke-width: 2; }
+      .panel-c { fill: #fffbf5; stroke: #d8b78f; stroke-width: 2; }
+      .panel-d { fill: #f8f7ff; stroke: #b7a6dc; stroke-width: 2; }
+      .panel-e { fill: #fff8fa; stroke: #d7a5b4; stroke-width: 2; }
+      .chip { fill: #ffffff; stroke: #b8c9d8; stroke-width: 1.5; }
+      .arrow { stroke: #3d6f9f; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
       .dashed { stroke-dasharray: 8 6; }
+      .legend-ok { fill: #1f9d55; }
+      .legend-warn { fill: #d97706; }
+      .legend-bad { fill: #be123c; }
+      .legend-skip { fill: #475569; }
     ]]></style>
-    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#2f5f96"/>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#3d6f9f"/>
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="1440" height="900" fill="url(#bg)"/>
+  <text x="48" y="62" class="title">JobFinder: Local AI Job Discovery Architecture</text>
+  <text x="48" y="94" class="subtitle">Ollama + LangGraph + Source Adapters + SQLite/FAISS + Streamlit</text>
 
-  <text x="60" y="70" class="title">JobFinder Local AI Agent</text>
-  <text x="60" y="102" class="subtitle">Ollama + LangChain/LangGraph + SQLite/FAISS + FastAPI dashboard</text>
+  <rect x="36" y="122" width="1628" height="170" rx="16" class="panel-a"/>
+  <text x="56" y="154" class="lane-title">1. Entry Points and Orchestration</text>
 
-  <rect x="50" y="145" width="1340" height="210" rx="22" fill="#cfe0ff" opacity="0.38"/>
-  <text x="70" y="178" class="lane-title">Entry Points</text>
+  <rect x="62" y="172" width="368" height="100" rx="12" class="chip"/>
+  <text x="82" y="202" class="card-title">CLI Commands (Typer)</text>
+  <text x="82" y="225" class="card-text">run, crawl, report, serve, prune</text>
+  <text x="82" y="247" class="card-text">`uv run jobfinder &lt;command&gt;`</text>
 
-  <rect x="90" y="200" width="340" height="130" rx="16" fill="#ffffff" stroke="#7ea4d9" stroke-width="2"/>
-  <text x="112" y="236" class="box-title">CLI (Typer)</text>
-  <text x="112" y="264" class="box-text">`run`, `crawl`, `report`, `serve`, `prune`</text>
-  <text x="112" y="288" class="box-text">Loads profile + env, executes service</text>
+  <rect x="460" y="172" width="368" height="100" rx="12" class="chip"/>
+  <text x="480" y="202" class="card-title">Runtime Builder</text>
+  <text x="480" y="225" class="card-text">loads `.env` + search profile YAML</text>
+  <text x="480" y="247" class="card-text">ensures data folders + DB init</text>
 
-  <rect x="500" y="200" width="380" height="130" rx="16" fill="#ffffff" stroke="#7ea4d9" stroke-width="2"/>
-  <text x="522" y="236" class="box-title">Web UI (FastAPI + Jinja2)</text>
-  <text x="522" y="264" class="box-text">Read-only dashboard over persisted runs</text>
-  <text x="522" y="288" class="box-text">Source health, ranked jobs, run detail</text>
+  <rect x="858" y="172" width="368" height="100" rx="12" class="chip"/>
+  <text x="878" y="202" class="card-title">JobFinderService</text>
+  <text x="878" y="225" class="card-text">binds adapters, vector index, LLM scorer</text>
+  <text x="878" y="247" class="card-text">runs workflow, report generation, pruning</text>
 
-  <rect x="950" y="200" width="390" height="130" rx="16" fill="#ffffff" stroke="#7ea4d9" stroke-width="2"/>
-  <text x="972" y="236" class="box-title">Config Layer</text>
-  <text x="972" y="264" class="box-text">`config/search_profiles.yaml`</text>
-  <text x="972" y="288" class="box-text">`.env` with `JOBFINDER_*` settings</text>
+  <rect x="1256" y="172" width="380" height="100" rx="12" class="chip"/>
+  <text x="1276" y="202" class="card-title">Optional Scheduling</text>
+  <text x="1276" y="225" class="card-text">systemd timer (`jobfinder.timer`)</text>
+  <text x="1276" y="247" class="card-text">daily unattended runs</text>
 
-  <rect x="50" y="385" width="1340" height="245" rx="22" fill="#b9f0dd" opacity="0.30"/>
-  <text x="70" y="418" class="lane-title">Core Pipeline (LangGraph)</text>
+  <rect x="36" y="322" width="1034" height="326" rx="16" class="panel-b"/>
+  <text x="56" y="354" class="lane-title">2. Ingestion and Normalization Layer</text>
 
-  <rect x="90" y="442" width="1240" height="165" rx="16" fill="#ffffff" stroke="#6dc29f" stroke-width="2"/>
-  <text x="112" y="478" class="box-title">Workflow Engine</text>
-  <text x="112" y="505" class="box-text">load_profile → fetch_sources_parallel → normalize → dedup/upsert → score → rank → report</text>
-  <text x="112" y="531" class="box-text">Partial failure tolerant: per-source errors logged, run continues</text>
-  <text x="112" y="557" class="box-text">LinkedIn blocked → marked as `blocked`, not fatal</text>
+  <rect x="62" y="372" width="486" height="252" rx="12" class="chip"/>
+  <text x="82" y="402" class="card-title">Source Adapter Registry</text>
+  <text x="82" y="426" class="card-sub">Public-only strategy (no authenticated scraping)</text>
+  <text x="82" y="452" class="card-text">- linkedin_public (guest endpoint, best effort)</text>
+  <text x="82" y="474" class="card-text">- greenhouse_deepmind</text>
+  <text x="82" y="496" class="card-text">- workable_huggingface (API then HTML fallback)</text>
+  <text x="82" y="518" class="card-text">- lever_mistral</text>
+  <text x="82" y="540" class="card-text">- openai (fallback URLs, can return 403)</text>
+  <text x="82" y="562" class="card-text">- anthropic</text>
+  <text x="82" y="592" class="tiny">Each adapter: fetch(...) -> RawJobPosting[] and normalize(...) -> NormalizedJobPosting</text>
 
-  <rect x="50" y="660" width="1340" height="200" rx="22" fill="#ffd9be" opacity="0.32"/>
-  <text x="70" y="692" class="lane-title">Adapters, Scoring, and Storage</text>
+  <rect x="578" y="372" width="466" height="252" rx="12" class="chip"/>
+  <text x="598" y="402" class="card-title">LangGraph Workflow Core</text>
+  <text x="598" y="426" class="card-sub">12-node deterministic graph</text>
+  <text x="598" y="452" class="card-text">load_profile -> expand_queries -> fetch_sources_parallel</text>
+  <text x="598" y="474" class="card-text">-> normalize_records -> deduplicate_and_upsert -> rule_filter</text>
+  <text x="598" y="496" class="card-text">-> embedding_score -> llm_fit_score -> rank_and_select</text>
+  <text x="598" y="518" class="card-text">-> persist_outputs -> generate_digest -> finalize_run_status</text>
+  <text x="598" y="550" class="card-text">Failure handling:</text>
+  <text x="620" y="572" class="tiny">source-level errors are non-fatal</text>
+  <text x="620" y="592" class="tiny">run fails only when all sources fail/blocked/skipped</text>
 
-  <rect x="90" y="716" width="360" height="120" rx="14" fill="#ffffff" stroke="#d59d6d" stroke-width="2"/>
-  <text x="112" y="748" class="box-title">Source Adapters</text>
-  <text x="112" y="773" class="box-text">LinkedIn, Greenhouse, Workable, Lever,</text>
-  <text x="112" y="796" class="box-text">OpenAI Careers, Anthropic Careers</text>
+  <rect x="1100" y="322" width="564" height="326" rx="16" class="panel-c"/>
+  <text x="1120" y="354" class="lane-title">3. Scoring and Ranking Intelligence</text>
 
-  <rect x="520" y="716" width="360" height="120" rx="14" fill="#ffffff" stroke="#d59d6d" stroke-width="2"/>
-  <text x="542" y="748" class="box-title">Scoring Stack</text>
-  <text x="542" y="773" class="box-text">Rule score + FAISS semantic score +</text>
-  <text x="542" y="796" class="box-text">Ollama LLM fit (`ministral-3:14b`)</text>
+  <rect x="1126" y="372" width="250" height="112" rx="12" class="chip"/>
+  <text x="1146" y="402" class="card-title">Rule Score (35%)</text>
+  <text x="1146" y="424" class="card-text">title/location/skills heuristics</text>
+  <text x="1146" y="446" class="card-text">candidate thresholding</text>
 
-  <rect x="950" y="716" width="380" height="120" rx="14" fill="#ffffff" stroke="#d59d6d" stroke-width="2"/>
-  <text x="972" y="748" class="box-title">Persistence</text>
-  <text x="972" y="773" class="box-text">SQLite (`runs`, `jobs`, `job_scores`, alerts)</text>
-  <text x="972" y="796" class="box-text">Raw snapshots + reports + FAISS indices</text>
+  <rect x="1400" y="372" width="238" height="112" rx="12" class="chip"/>
+  <text x="1420" y="402" class="card-title">Semantic (30%)</text>
+  <text x="1420" y="424" class="card-text">Ollama embeddings</text>
+  <text x="1420" y="446" class="card-text">FAISS similarity</text>
 
-  <path class="arrow" d="M260 331 L260 440"/>
-  <path class="arrow" d="M690 331 L690 440"/>
-  <path class="arrow" d="M1145 331 L1145 440"/>
+  <rect x="1126" y="506" width="250" height="118" rx="12" class="chip"/>
+  <text x="1146" y="536" class="card-title">LLM Fit (35%)</text>
+  <text x="1146" y="558" class="card-text">`ministral-3:14b` scoring</text>
+  <text x="1146" y="580" class="card-text">role/research/location/seniority</text>
+  <text x="1146" y="602" class="card-text">+ rationale</text>
 
-  <path class="arrow" d="M260 607 L260 715"/>
-  <path class="arrow" d="M690 607 L690 715"/>
-  <path class="arrow" d="M1145 607 L1145 715"/>
+  <rect x="1400" y="506" width="238" height="118" rx="12" class="chip"/>
+  <text x="1420" y="536" class="card-title">Rank + Freshness</text>
+  <text x="1420" y="558" class="card-text">weighted composite 0-100</text>
+  <text x="1420" y="580" class="card-text">recent jobs bonus</text>
+  <text x="1420" y="602" class="card-text">top N digest selection</text>
 
-  <path class="arrow dashed" d="M450 775 L520 775"/>
-  <path class="arrow dashed" d="M880 775 L950 775"/>
+  <rect x="36" y="678" width="1628" height="312" rx="16" class="panel-d"/>
+  <text x="56" y="710" class="lane-title">4. Persistence, Reports, and Dashboard</text>
+
+  <rect x="62" y="728" width="516" height="236" rx="12" class="chip"/>
+  <text x="82" y="758" class="card-title">SQLite Persistence (`data/jobfinder.sqlite`)</text>
+  <text x="82" y="782" class="card-text">runs, run_source_status, jobs, job_versions</text>
+  <text x="82" y="804" class="card-text">alerts, job_scores, profile_snapshots</text>
+  <text x="82" y="836" class="card-text">Canonical row + version history design:</text>
+  <text x="104" y="858" class="tiny">jobs = latest state by source/source_job_id</text>
+  <text x="104" y="878" class="tiny">job_versions = immutable snapshots with content_hash</text>
+  <text x="104" y="898" class="tiny">alerts = unseen jobs in dedup window</text>
+
+  <rect x="608" y="728" width="496" height="236" rx="12" class="chip"/>
+  <text x="628" y="758" class="card-title">Filesystem Artifacts</text>
+  <text x="628" y="782" class="card-text">`data/raw/YYYY/MM/DD/*.json.gz`</text>
+  <text x="628" y="804" class="card-text">`data/index/faiss/&lt;run_id&gt;/`</text>
+  <text x="628" y="826" class="card-text">`data/reports/YYYY-MM-DD/&lt;run_id&gt;.md`</text>
+  <text x="628" y="848" class="card-text">`data/reports/YYYY-MM-DD/&lt;run_id&gt;.json`</text>
+  <text x="628" y="880" class="tiny">`prune --days N` cleans old DB rows, snapshots, and reports</text>
+
+  <rect x="1134" y="728" width="504" height="236" rx="12" class="chip"/>
+  <text x="1154" y="758" class="card-title">User-facing Outputs</text>
+  <text x="1154" y="782" class="card-text">CLI summary (run_id, counts, report paths)</text>
+  <text x="1154" y="804" class="card-text">Markdown/JSON digest for automation</text>
+  <text x="1154" y="826" class="card-text">Streamlit dashboard (`jobfinder serve`)</text>
+  <text x="1154" y="858" class="tiny">filter jobs, inspect score breakdown, view full description text</text>
+  <text x="1154" y="878" class="tiny">description rendering preserves plain-text indentation and HTML blocks</text>
+
+  <path class="arrow" d="M430 222 L460 222"/>
+  <path class="arrow" d="M828 222 L858 222"/>
+  <path class="arrow" d="M1226 222 L1256 222"/>
+
+  <path class="arrow" d="M1044 500 L1126 428"/>
+  <path class="arrow" d="M1044 520 L1126 566"/>
+
+  <path class="arrow" d="M548 496 L578 496"/>
+  <path class="arrow" d="M1376 428 L1400 428"/>
+  <path class="arrow" d="M1376 566 L1400 566"/>
+
+  <path class="arrow" d="M1520 624 L1520 726"/>
+  <path class="arrow" d="M920 624 L920 726"/>
+  <path class="arrow" d="M320 624 L320 726"/>
+
+  <path class="arrow dashed" d="M578 840 L608 840"/>
+  <path class="arrow dashed" d="M1104 840 L1134 840"/>
+
+  <g transform="translate(1390,126)">
+    <rect x="0" y="0" width="260" height="154" rx="10" class="chip"/>
+    <text x="16" y="28" class="card-title">Source Status Legend</text>
+    <circle cx="22" cy="52" r="6" class="legend-ok"/>
+    <text x="38" y="57" class="tiny">success</text>
+    <circle cx="22" cy="76" r="6" class="legend-warn"/>
+    <text x="38" y="81" class="tiny">blocked / warnings</text>
+    <circle cx="22" cy="100" r="6" class="legend-bad"/>
+    <text x="38" y="105" class="tiny">error</text>
+    <circle cx="22" cy="124" r="6" class="legend-skip"/>
+    <text x="38" y="129" class="tiny">skipped (disabled source)</text>
+  </g>
 </svg>
