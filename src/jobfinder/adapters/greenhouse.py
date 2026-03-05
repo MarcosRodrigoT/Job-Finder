@@ -19,6 +19,21 @@ class GreenhouseAdapter(SourceAdapter):
 
         results: list[RawJobPosting] = []
         for job in jobs:
+            employment_type = None
+            seniority = None
+            metadata = job.get("metadata") or []
+            if isinstance(metadata, list):
+                for item in metadata:
+                    if not isinstance(item, dict):
+                        continue
+                    name = str(item.get("name") or "")
+                    value = item.get("value")
+                    lowered = name.lower()
+                    if "employment" in lowered and value:
+                        employment_type = str(value)
+                    elif ("senior" in lowered or "level" in lowered) and value:
+                        seniority = str(value)
+
             results.append(
                 RawJobPosting(
                     source=self.source,
@@ -30,8 +45,8 @@ class GreenhouseAdapter(SourceAdapter):
                         "url": job.get("absolute_url", ""),
                         "posted_at": job.get("updated_at"),
                         "description": job.get("content") or "",
-                        "employment_type": (job.get("metadata") or {}).get("Employment Type"),
-                        "seniority": (job.get("metadata") or {}).get("Seniority"),
+                        "employment_type": employment_type,
+                        "seniority": seniority,
                     },
                     url=job.get("absolute_url"),
                 )
