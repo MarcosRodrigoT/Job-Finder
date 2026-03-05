@@ -17,6 +17,12 @@ class GreenhouseAdapter(SourceAdapter):
         response.raise_for_status()
         jobs = response.json().get("jobs", [])
 
+        # Build location filter terms from profile
+        location_terms = [loc.strip().lower() for loc in profile.locations if loc.strip()]
+        # Always include "remote" as acceptable
+        if "remote" not in location_terms:
+            location_terms.append("remote")
+
         results: list[RawJobPosting] = []
         for job in jobs:
             employment_type = None
@@ -34,6 +40,14 @@ class GreenhouseAdapter(SourceAdapter):
                     elif ("senior" in lowered or "level" in lowered) and value:
                         seniority = str(value)
 
+            location_name = (job.get("location") or {}).get("name", "")
+
+            # Filter by profile locations if terms are provided
+            if location_terms:
+                loc_lower = location_name.lower()
+                if not any(term in loc_lower for term in location_terms):
+                    continue
+
             results.append(
                 RawJobPosting(
                     source=self.source,
@@ -41,7 +55,7 @@ class GreenhouseAdapter(SourceAdapter):
                     payload={
                         "id": str(job.get("id", "")),
                         "title": job.get("title", ""),
-                        "location": (job.get("location") or {}).get("name", ""),
+                        "location": location_name,
                         "url": job.get("absolute_url", ""),
                         "posted_at": job.get("updated_at"),
                         "description": job.get("content") or "",
