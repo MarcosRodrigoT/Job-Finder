@@ -285,7 +285,7 @@ class GenericPublicCareersAdapter(SourceAdapter):
 
     def _extract_jobs_from_script_urls(self, soup: BeautifulSoup, base_url: str) -> list[dict[str, str | None]]:
         jobs: list[dict[str, str | None]] = []
-        pattern = re.compile(r"https?://[^\s'\"<>]+")
+        pattern = re.compile(r"https?://[^\s'\"<>\\]+")
 
         for script in soup.select("script"):
             text = script.string or script.get_text() or ""
@@ -451,7 +451,10 @@ class GenericPublicCareersAdapter(SourceAdapter):
     def _title_from_url(self, url: str) -> str:
         slug = urlparse(url).path.rsplit("/", 1)[-1]
         slug = slug.replace("-", " ").replace("_", " ").strip()
-        return slug.title() or "Job Opportunity"
+        # Reject pure numeric slugs (job IDs, not titles)
+        if not slug or slug.replace(" ", "").isdigit():
+            return ""
+        return slug.title()
 
     def _infer_location(self, anchor: Tag, profile: SearchProfile) -> str:
         parent = anchor.find_parent(["article", "li", "div", "section", "tr"])
