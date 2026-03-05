@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import logging
-import re
 
 import httpx
-from bs4 import BeautifulSoup
 
 from jobfinder.adapters.base import SourceAdapter
 from jobfinder.models.domain import NormalizedJobPosting, RawJobPosting, SearchProfile
@@ -18,113 +16,148 @@ class WorkableAdapter(SourceAdapter):
 
     API_URL = "https://apply.workable.com/api/v3/accounts/huggingface/jobs"
     PUBLIC_URL = "https://apply.workable.com/huggingface/?lng=en"
+    MAX_PAGES = 10
+
+    DETAIL_URL_TEMPLATE = "https://apply.workable.com/api/v1/accounts/huggingface/jobs/{shortcode}"
+    MAX_DETAIL_FETCH = 50
 
     def fetch(self, profile: SearchProfile, client: httpx.Client, browser_ctx: object | None = None) -> list[RawJobPosting]:
-        response = client.get(self.API_URL)
-        jobs: list[dict] = []
-        if response.status_code == 200:
-            payload = response.json()
-            if isinstance(payload, dict):
-                jobs = list(payload.get("results", []))
-        else:
-            logger.info("Workable API returned %s, falling back to public HTML parse", response.status_code)
-
+        jobs = self._fetch_from_api(client)
         if jobs:
-            return self._from_api_payload(jobs)
-        return self._from_public_html(client)
+            postings = self._from_api_payload(jobs)
+            self._enrich_descriptions(postings, client)
+            return postings
+        return []
+
+    def _fetch_from_api(self, client: httpx.Client) -> list[dict]:
+        all_jobs: list[dict] = []
+        body: dict = {
+            "query": "",
+            "location": [],
+            "department": [],
+            "worktype": [],
+            "remote": [],
+        }
+
+        for _ in range(self.MAX_PAGES):
+            try:
+                response = client.post(
+                    self.API_URL,
+                    json=body,
+                    headers={"Content-Type": "application/json"},
+                )
+            except httpx.HTTPError:
+                break
+
+            if response.status_code != 200:
+                logger.info("Workable API returned %s", response.status_code)
+                break
+
+            payload = response.json()
+            if not isinstance(payload, dict):
+                break
+
+            results = payload.get("results", [])
+            if not results:
+                break
+
+            all_jobs.extend(results)
+
+            next_page = payload.get("nextPage")
+            if not next_page:
+                break
+            body = {**body, "token": next_page}
+
+        return all_jobs
 
     def _from_api_payload(self, jobs: list[dict]) -> list[RawJobPosting]:
         out: list[RawJobPosting] = []
         for job in jobs:
+            shortcode = str(job.get("shortcode", ""))
+            url = f"https://apply.workable.com/huggingface/j/{shortcode}/" if shortcode else ""
+
+            location = self._build_location(job)
+
             out.append(
                 RawJobPosting(
                     source=self.source,
                     company=self.company,
                     payload={
-                        "id": str(job.get("shortcode", "")),
+                        "id": shortcode,
                         "title": job.get("title", ""),
-                        "location": (job.get("location") or {}).get("location_str", ""),
-                        "url": job.get("url", ""),
+                        "location": location,
+                        "url": url,
                         "posted_at": job.get("published"),
                         "description": job.get("description") or "",
                         "employment_type": job.get("type"),
                         "seniority": job.get("experience"),
+                        "remote": job.get("remote", False),
                     },
-                    url=job.get("url"),
+                    url=url,
                 )
             )
         return out
 
-    def _from_public_html(self, client: httpx.Client) -> list[RawJobPosting]:
-        response = client.get(self.PUBLIC_URL)
-        response.raise_for_status()
-
-        soup = BeautifulSoup(response.text, "html.parser")
-        out: list[RawJobPosting] = []
-        seen_urls: set[str] = set()
-
-        for anchor in soup.select("a[href*='/j/'], a[href*='/jobs/'], a[href*='job']"):
-            href = (anchor.get("href") or "").strip()
-            title = anchor.get_text(strip=True)
-            if not href or not title:
+    def _enrich_descriptions(self, postings: list[RawJobPosting], client: httpx.Client) -> None:
+        for posting in postings[: self.MAX_DETAIL_FETCH]:
+            shortcode = posting.payload.get("id", "")
+            if not shortcode:
                 continue
-            if not href.startswith("http"):
-                href = f"https://apply.workable.com{href}"
-            if href in seen_urls:
+            url = self.DETAIL_URL_TEMPLATE.format(shortcode=shortcode)
+            try:
+                response = client.get(url)
+            except httpx.HTTPError:
                 continue
-            seen_urls.add(href)
+            if response.status_code != 200:
+                continue
+            try:
+                detail = response.json()
+            except Exception:
+                continue
+            parts = []
+            for field in ("description", "requirements", "benefits"):
+                text = str(detail.get(field) or "").strip()
+                if text:
+                    parts.append(text)
+            if parts:
+                posting.payload["description"] = "\n\n".join(parts)
 
-            container_text = ""
-            parent = anchor.find_parent(["article", "li", "div"])
-            if parent is not None:
-                container_text = parent.get_text(" ", strip=True)
-            location_match = re.search(r"(Madrid|Spain|Remote|Barcelona)", container_text, re.IGNORECASE)
-            location = location_match.group(1) if location_match else ""
-            description = self._fetch_job_description(client, href)
+    def _build_location(self, job: dict) -> str:
+        loc = job.get("location")
+        if isinstance(loc, dict):
+            parts = [
+                str(loc.get("city") or ""),
+                str(loc.get("region") or ""),
+                str(loc.get("country") or ""),
+            ]
+            location_str = ", ".join(p for p in parts if p)
+        else:
+            location_str = str(loc or "")
 
-            out.append(
-                RawJobPosting(
-                    source=self.source,
-                    company=self.company,
-                    payload={
-                        "id": href.rsplit("/", 1)[-1],
-                        "title": title,
-                        "location": location,
-                        "url": href,
-                        "posted_at": None,
-                        "description": description,
-                        "employment_type": None,
-                        "seniority": None,
-                    },
-                    url=href,
-                )
-            )
-        return out
+        locations_list = job.get("locations")
+        if isinstance(locations_list, list) and len(locations_list) > 1:
+            extras = []
+            for extra_loc in locations_list[1:]:
+                if isinstance(extra_loc, dict):
+                    extra_parts = [
+                        str(extra_loc.get("city") or ""),
+                        str(extra_loc.get("country") or ""),
+                    ]
+                    extra_str = ", ".join(p for p in extra_parts if p)
+                    if extra_str:
+                        extras.append(extra_str)
+            if extras:
+                location_str = "; ".join([location_str, *extras]) if location_str else "; ".join(extras)
 
-    def _fetch_job_description(self, client: httpx.Client, url: str) -> str:
-        if not url:
-            return ""
-        try:
-            response = client.get(url)
-        except httpx.HTTPError:
-            return ""
-        if response.status_code >= 400:
-            return ""
+        if job.get("remote"):
+            location_str = f"{location_str} (Remote)" if location_str else "Remote"
 
-        return self._extract_description_from_html(
-            response.text,
-            selectors=[
-                "section[data-ui='job-description']",
-                "div[data-ui='job-description']",
-                "div[class*='job-description']",
-                "section[class*='job-description']",
-                "article",
-            ],
-        )
+        return location_str
 
     def normalize(self, raw: RawJobPosting) -> NormalizedJobPosting:
         p = raw.payload
         location_text = p.get("location", "")
+        is_remote = p.get("remote", False) or "remote" in str(location_text).lower()
         return NormalizedJobPosting(
             source=self.source,
             company=self.company,
@@ -132,7 +165,7 @@ class WorkableAdapter(SourceAdapter):
             url=p.get("url") or "https://apply.workable.com/huggingface/",
             title=p.get("title", "Unknown role"),
             location_text=location_text,
-            is_remote="remote" in location_text.lower(),
+            is_remote=is_remote,
             posted_at=self._safe_dt(p.get("posted_at")),
             description_text=p.get("description", ""),
             employment_type=p.get("employment_type"),
