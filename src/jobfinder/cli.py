@@ -71,7 +71,7 @@ def report(
 
 @app.command()
 def serve(
-    host: str = typer.Option("127.0.0.1", "--host"),
+    host: str = typer.Option("0.0.0.0", "--host"),
     port: int = typer.Option(8765, "--port"),
     config: Path = typer.Option(Path("config/search_profiles.yaml"), "--config", help="Profile YAML path"),
     verbose: bool = typer.Option(False, "--verbose"),
