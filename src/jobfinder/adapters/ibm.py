@@ -14,6 +14,8 @@ class IBMCareersAdapter(GenericPublicCareersAdapter):
 
     SEARCH_URLS = (ROOT_URL,)
     ALLOWED_DOMAINS = ("ibm.com", "www.ibm.com", "careers.ibm.com")
+    JOB_URL_HINTS = ("/job", "/jobs", "/JobDetail", "/careers/job")
+    WAIT_SELECTOR = "a[href*='JobDetail']"
     DESCRIPTION_SELECTORS = (
         "section[class*='job-description']",
         "div[class*='job-description']",

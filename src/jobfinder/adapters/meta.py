@@ -14,6 +14,8 @@ class MetaCareersAdapter(GenericPublicCareersAdapter):
 
     SEARCH_URLS = (ROOT_URL,)
     ALLOWED_DOMAINS = ("metacareers.com", "www.metacareers.com")
+    JOB_URL_HINTS = ("/job", "/jobs", "/job_details", "/profile/job_details")
+    WAIT_SELECTOR = "a[href*='job_details']"
     DESCRIPTION_SELECTORS = (
         "div[data-testid='job-description']",
         "section[data-testid='job-description']",

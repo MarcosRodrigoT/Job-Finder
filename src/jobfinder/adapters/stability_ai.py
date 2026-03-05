@@ -10,6 +10,7 @@ class StabilityAICareersAdapter(GenericPublicCareersAdapter):
     ROOT_URL = "https://stability.ai/careers"
 
     SEARCH_URLS = (ROOT_URL,)
+    WAIT_SELECTOR = "a[href*='/job'], a[href*='greenhouse'], a[href*='lever']"
     ALLOWED_DOMAINS = (
         "stability.ai",
         "www.stability.ai",

@@ -15,6 +15,7 @@ class AdobeCareersAdapter(GenericPublicCareersAdapter):
 
     SEARCH_URLS = (ROOT_URL,)
     ALLOWED_DOMAINS = ("careers.adobe.com", "adobe.wd5.myworkdayjobs.com")
+    WAIT_SELECTOR = "a[href*='/job/']"
     DESCRIPTION_SELECTORS = (
         "section[class*='job-description']",
         "div[class*='job-description']",

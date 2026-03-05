@@ -21,6 +21,7 @@ class MicrosoftCareersAdapter(GenericPublicCareersAdapter):
         "careers.microsoft.com",
         "jobs.careers.microsoft.com",
     )
+    WAIT_SELECTOR = "a[href*='/careers/job/']"
     DESCRIPTION_SELECTORS = (
         "section[class*='job-description']",
         "div[class*='job-description']",
