@@ -66,7 +66,7 @@ class LinkedInPublicAdapter(SourceAdapter):
         if response.status_code >= 400:
             return ""
 
-        return self._extract_description_from_html(
+        desc = self._extract_description_from_html(
             response.text,
             selectors=[
                 "div.show-more-less-html__markup",
@@ -74,8 +74,14 @@ class LinkedInPublicAdapter(SourceAdapter):
                 "div.description__text",
                 "div.jobs-description-content__text",
                 "div.jobs-box__html-content",
+                "div.decorated-job-posting__details",
+                "section.description",
             ],
         )
+        # If selectors returned only boilerplate (very short), discard
+        if desc and len(desc.split()) < 5:
+            return ""
+        return desc
 
     def normalize(self, raw: RawJobPosting) -> NormalizedJobPosting:
         payload = raw.payload
