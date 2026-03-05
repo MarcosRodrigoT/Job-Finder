@@ -82,8 +82,8 @@ class GoogleCareersAdapter(GenericPublicCareersAdapter):
                 "description": None,
             })
 
-        # Also try the standard extraction for JSON-LD etc.
-        jobs.extend(super()._extract_jobs(html, base_url=base_url, profile=profile))
+        # Skip super()._extract_jobs() — Google's SPA page has no useful JSON-LD
+        # and the anchor-based extraction picks up navigation/UI junk text.
         return jobs
 
     def build_search_urls(self, profile: SearchProfile) -> list[str]:
