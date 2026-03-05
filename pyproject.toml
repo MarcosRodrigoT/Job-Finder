@@ -25,6 +25,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+browser = [
+  "playwright>=1.40",
+]
 dev = [
   "ruff>=0.6.4",
   "mypy>=1.11.2",

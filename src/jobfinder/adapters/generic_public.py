@@ -96,6 +96,8 @@ class GenericPublicCareersAdapter(SourceAdapter):
                 return cleaned
         return "Spain"
 
+    WAIT_SELECTOR: str | None = None
+
     def fetch(
         self,
         profile: SearchProfile,
@@ -123,10 +125,47 @@ class GenericPublicCareersAdapter(SourceAdapter):
 
             extracted.extend(self._extract_jobs(response.text, base_url=url, profile=profile))
 
-        if not extracted and blocked_count == len(search_urls):
+        if extracted:
+            static_postings = self._to_raw_postings(extracted, client)
+            # If we got a decent number of results, return them
+            if len(static_postings) >= 3 or browser_ctx is None:
+                return static_postings
+            # Try browser for better results
+            browser_jobs = self._fetch_with_browser(search_urls, profile, client)
+            if browser_jobs and len(browser_jobs) > len(static_postings):
+                return browser_jobs
+            return static_postings
+
+        # Fall back to browser rendering if available and static fetch failed
+        if browser_ctx is not None:
+            browser_jobs = self._fetch_with_browser(search_urls, profile, client)
+            if browser_jobs:
+                return browser_jobs
+
+        if blocked_count == len(search_urls):
             raise SourceBlockedError(f"{self.source} blocked all search requests")
 
-        return self._to_raw_postings(extracted, client)
+        return []
+
+    def _fetch_with_browser(
+        self,
+        search_urls: list[str],
+        profile: SearchProfile,
+        client: httpx.Client,
+    ) -> list[RawJobPosting]:
+        from jobfinder.adapters.browser import fetch_rendered_html
+
+        extracted: list[dict[str, str | None]] = []
+        for url in search_urls:
+            rendered_html = fetch_rendered_html(
+                url, wait_selector=self.WAIT_SELECTOR,
+            )
+            if rendered_html:
+                extracted.extend(self._extract_jobs(rendered_html, base_url=url, profile=profile))
+
+        if extracted:
+            return self._to_raw_postings(extracted, client)
+        return []
 
     def _to_raw_postings(self, jobs: list[dict[str, str | None]], client: httpx.Client) -> list[RawJobPosting]:
         deduped: dict[str, dict[str, str | None]] = {}

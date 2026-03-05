@@ -116,12 +116,18 @@ class JobFinderWorkflow:
         return {**state, "query_terms": query_terms}
 
     def fetch_sources_parallel(self, state: JobFinderState) -> JobFinderState:
+        from jobfinder.adapters.browser import is_browser_available
+
         profile = state["profile"]
         run_result = state["run_result"]
         statuses: list[SourceRunStatus] = []
         raw_by_source: dict[str, list] = {}
 
-        headers = {"User-Agent": self.deps.user_agent}
+        headers = {
+            "User-Agent": self.deps.user_agent,
+            "Accept-Encoding": "gzip, deflate",
+        }
+        browser_flag = True if is_browser_available() else None
 
         def do_fetch(adapter: SourceAdapter) -> tuple[str, list, SourceRunStatus]:
             if not profile.source_enabled.get(adapter.source, True):
@@ -129,7 +135,7 @@ class JobFinderWorkflow:
 
             with httpx.Client(timeout=self.deps.request_timeout_seconds, headers=headers, follow_redirects=True) as client:
                 try:
-                    jobs = adapter.fetch(profile, client, browser_ctx=None)
+                    jobs = adapter.fetch(profile, client, browser_ctx=browser_flag)
                     status = SourceRunStatus(
                         source=adapter.source,
                         status=SourceStatus.success,
