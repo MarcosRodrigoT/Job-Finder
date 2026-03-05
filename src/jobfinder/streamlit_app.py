@@ -59,6 +59,30 @@ def _fmt_dt(value: object) -> str:
     return raw
 
 
+SOURCE_DISPLAY_NAMES: dict[str, str] = {
+    "linkedin": "LinkedIn",
+    "amazon": "Amazon",
+    "meta": "Meta",
+    "google": "Google",
+    "greenhouse_deepmind": "DeepMind",
+    "microsoft": "Microsoft",
+    "adobe": "Adobe",
+    "stability_ai": "Stability AI",
+    "workable_huggingface": "Hugging Face",
+    "nvidia": "NVIDIA",
+    "apple": "Apple",
+    "ibm": "IBM",
+    "lever_mistral": "Mistral AI",
+    "openai": "OpenAI",
+    "anthropic": "Anthropic",
+    "runwayml": "Runway",
+}
+
+
+def _display_source(source: str) -> str:
+    return SOURCE_DISPLAY_NAMES.get(source, source.replace("_", " ").title())
+
+
 def _score_emoji(score: float) -> str:
     if score >= 85:
         return "🔥"
@@ -367,10 +391,10 @@ def _source_contribution_chart(source_counts: Counter[str]) -> None:
 
     if alt is None or pd is None:
         for source, count in source_counts.most_common():
-            st.write(f"**{source}** · {count}")
+            st.write(f"**{_display_source(source)}** · {count}")
         return
 
-    rows = [{"source": source, "count": count} for source, count in source_counts.items()]
+    rows = [{"source": _display_source(source), "count": count} for source, count in source_counts.items()]
     df = pd.DataFrame(rows)
     palette = [
         "#0EA5A4",
@@ -486,7 +510,7 @@ def main() -> None:
     sources = sorted({str(row["source"]) for row in ranked_rows})
     with st.sidebar:
         with st.expander("🛰️ Sources", expanded=True):
-            selected_sources = [src for src in sources if st.checkbox(src, value=True, key=f"src_{src}")]
+            selected_sources = [src for src in sources if st.checkbox(_display_source(src), value=True, key=f"src_{src}")]
 
     filtered = []
     needle = query.strip().lower()
@@ -617,7 +641,7 @@ def main() -> None:
         st.caption(f"🏢 {job.company} · 📍 {job.location_text}")
 
         st.markdown(
-            f"[🔗 Open Source Link]({job.url}) · via `{job.source}` · "
+            f"[🔗 Open Source Link]({job.url}) · via `{_display_source(job.source)}` · "
             f"first seen **{_fmt_dt(job.first_seen_at)}** · last seen **{_fmt_dt(job.last_seen_at)}**"
         )
 
