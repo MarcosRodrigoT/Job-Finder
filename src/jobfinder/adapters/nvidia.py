@@ -19,6 +19,9 @@ class NvidiaCareersAdapter(SourceAdapter):
     PAGE_SIZE = 20
     MAX_PAGES = 10
 
+    DETAIL_API_URL = "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite"
+    MAX_DETAIL_FETCH = 50
+
     def fetch(self, profile: SearchProfile, client: httpx.Client, browser_ctx: object | None = None) -> list[RawJobPosting]:
         search_text = self._keyword_query(profile)
         all_jobs = self._fetch_from_workday_api(client, search_text)
@@ -26,7 +29,9 @@ class NvidiaCareersAdapter(SourceAdapter):
             # Try simpler query as fallback
             all_jobs = self._fetch_from_workday_api(client, "machine learning")
         logger.info("NVIDIA fetched %d raw jobs", len(all_jobs))
-        return self._to_raw_postings(all_jobs)
+        postings = self._to_raw_postings(all_jobs)
+        self._enrich_descriptions(postings, client)
+        return postings
 
     def _keyword_query(self, profile: SearchProfile) -> str:
         terms = [term.strip() for term in profile.role_terms() if term.strip()]
@@ -108,12 +113,36 @@ class NvidiaCareersAdapter(SourceAdapter):
                         "url": url,
                         "posted_at": posted_on,
                         "description": "",
+                        "_external_path": external_path,
                     },
                     url=url,
                 )
             )
 
         return postings
+
+    def _enrich_descriptions(self, postings: list[RawJobPosting], client: httpx.Client) -> None:
+        for posting in postings[:self.MAX_DETAIL_FETCH]:
+            external_path = posting.payload.get("_external_path", "")
+            if not external_path:
+                continue
+            url = f"{self.DETAIL_API_URL}{external_path}"
+            try:
+                response = client.get(url, headers={"Accept": "application/json"})
+            except httpx.HTTPError:
+                continue
+            if response.status_code != 200:
+                continue
+            try:
+                detail = response.json()
+            except Exception:
+                continue
+            if not isinstance(detail, dict):
+                continue
+            job_data = detail.get("jobPostingInfo", {})
+            description = str(job_data.get("jobDescription") or "").strip()
+            if description:
+                posting.payload["description"] = description
 
     def normalize(self, raw: RawJobPosting) -> NormalizedJobPosting:
         p = raw.payload
