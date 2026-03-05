@@ -1,5 +1,3 @@
-import httpx
-
 from jobfinder.adapters.openai import OpenAIAdapter
 from jobfinder.adapters.workable import WorkableAdapter
 
@@ -31,54 +29,74 @@ def test_openai_extract_jobs_from_json_ld_and_links() -> None:
     assert "https://openai.com/careers/job-456" in urls
 
 
-def test_openai_greenhouse_payload_parser() -> None:
+def test_openai_ashby_api_parser() -> None:
     adapter = OpenAIAdapter()
-    payload = {
+    # Simulate the Ashby API JSON structure
+    import json
+    import httpx
+
+    ashby_response = {
         "jobs": [
             {
-                "id": 101,
+                "id": "abc-123",
                 "title": "Applied Research Scientist",
-                "absolute_url": "https://boards.greenhouse.io/openai/jobs/101",
-                "location": {"name": "San Francisco, CA"},
-                "updated_at": "2026-03-01T10:00:00Z",
-                "content": "<p>Research role</p>",
+                "department": "Research",
+                "team": "Research",
+                "employmentType": "FullTime",
+                "location": "San Francisco",
+                "secondaryLocations": [{"location": "New York", "address": {"postalAddress": {}}}],
+                "descriptionPlain": "We are looking for an Applied Research Scientist.",
+                "publishedAt": "2026-03-01T10:00:00Z",
+                "isListed": True,
             }
         ]
     }
 
-    jobs = adapter._extract_jobs_from_greenhouse_payload(payload)
-    assert len(jobs) == 1
-    assert jobs[0]["title"] == "Applied Research Scientist"
-    assert jobs[0]["location"] == "San Francisco, CA"
-
-
-def test_workable_html_fallback_extracts_job_links() -> None:
-    adapter = WorkableAdapter()
-
-    html = """
-    <html>
-      <body>
-        <div>
-          <a href="/j/ABC123">ML Engineer</a>
-          <span>Madrid, Spain</span>
-        </div>
-        <div>
-          <a href="https://apply.workable.com/huggingface/j/XYZ987">Applied Scientist</a>
-          <span>Remote</span>
-        </div>
-      </body>
-    </html>
-    """
-
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, text=html)
+        return httpx.Response(200, json=ashby_response)
 
     client = httpx.Client(transport=httpx.MockTransport(handler))
     try:
-        jobs = adapter._from_public_html(client)
+        jobs = adapter._fetch_from_ashby_api(client)
     finally:
         client.close()
 
-    assert len(jobs) == 2
-    assert jobs[0].payload["title"]
-    assert str(jobs[0].payload["url"]).startswith("http")
+    assert len(jobs) == 1
+    assert jobs[0]["title"] == "Applied Research Scientist"
+    assert jobs[0]["location"] == "San Francisco, New York"
+    assert jobs[0]["url"] == "https://jobs.ashbyhq.com/openai/abc-123"
+    assert jobs[0]["description"] == "We are looking for an Applied Research Scientist."
+
+
+def test_workable_api_payload_parser() -> None:
+    adapter = WorkableAdapter()
+
+    api_jobs = [
+        {
+            "shortcode": "ABC123",
+            "title": "ML Engineer",
+            "remote": True,
+            "location": {
+                "country": "France",
+                "city": "Paris",
+                "region": "Ile-de-France",
+            },
+            "locations": [
+                {"country": "France", "city": "Paris"},
+                {"country": "Spain", "city": "Madrid"},
+            ],
+            "published": "2026-03-01T10:00:00Z",
+            "description": "ML role description",
+            "type": "Full-time",
+        }
+    ]
+
+    postings = adapter._from_api_payload(api_jobs)
+
+    assert len(postings) == 1
+    p = postings[0]
+    assert p.payload["title"] == "ML Engineer"
+    assert "Paris" in p.payload["location"]
+    assert "Madrid" in p.payload["location"]
+    assert "Remote" in p.payload["location"]
+    assert p.payload["url"] == "https://apply.workable.com/huggingface/j/ABC123/"
