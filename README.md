@@ -4,6 +4,8 @@ Local-first AI job monitoring agent built with **Ollama + LangChain/LangGraph + 
 
 JobFinder crawls public job pages, normalizes postings into a single schema, scores relevance against your search profile (Madrid ML + Applied Research by default), and stores everything locally for reporting and dashboard review.
 
+![JobFinder Demo](assets/demo.gif)
+
 ## What Is Implemented
 
 - Public-source adapters (API-first with HTML fallback where possible):
