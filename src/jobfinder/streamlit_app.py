@@ -97,6 +97,12 @@ def _inject_theme() -> None:
     st.markdown(
         """
         <style>
+          /* Hide default Streamlit chrome */
+          header[data-testid="stHeader"] { display: none !important; }
+          [data-testid="stToolbar"] { display: none !important; }
+          .stDeployButton { display: none !important; }
+          #MainMenu { display: none !important; }
+
           :root {
             --ink: #11263b;
             --muted: #4d6278;
