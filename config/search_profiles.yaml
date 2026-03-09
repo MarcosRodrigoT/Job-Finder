@@ -46,3 +46,15 @@ profiles:
       llm: 0.35
     digest_size: 15
     dedup_days: 90
+    candidate_summary: |
+      I am seeking ML Engineer, AI Engineer, AI Researcher, and Applied Researcher
+      roles where I can work closely with the core of artificial intelligence systems,
+      especially in positions involving training, fine-tuning, and improving models
+      rather than only consuming prebuilt APIs. My background is strongest in computer
+      vision and multimodal AI, but I am also very interested in opportunities related
+      to NLP, LLMs, agentic AI, and RAG systems, particularly when they involve
+      meaningful model development and experimentation. I am most drawn to hybrid roles
+      based in Madrid, while remaining open to fully remote positions if the work is
+      especially compelling. I also place high value on joining larger organizations
+      with strong senior talent and mentorship, where I can continue learning while
+      contributing to impactful AI products and research-driven development.
