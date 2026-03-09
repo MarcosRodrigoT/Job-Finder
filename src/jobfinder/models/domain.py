@@ -26,6 +26,7 @@ class SearchProfile(BaseModel):
     scoring_weights: ScoringWeights = Field(default_factory=ScoringWeights)
     digest_size: int = Field(default=15, ge=1, le=100)
     dedup_days: int = Field(default=90, ge=1, le=365)
+    candidate_summary: str = ""
 
     def role_terms(self) -> list[str]:
         return list(dict.fromkeys([*self.target_roles, *self.role_synonyms]))
