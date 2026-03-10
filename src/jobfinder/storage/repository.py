@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime, timedelta
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Iterable
 
@@ -69,6 +71,42 @@ class JobRepository:
             )
             session.commit()
 
+    def _is_content_similar_to_recent(
+        self,
+        session: Session,
+        item: NormalizedJobPosting,
+        cutoff: datetime,
+        threshold: float = 0.85,
+    ) -> bool:
+        """Check if a new job's description closely matches a recent job from same source+company."""
+        similar_jobs_stmt = select(JobRecord).where(
+            JobRecord.source == item.source,
+            JobRecord.company == item.company,
+            JobRecord.last_seen_at >= cutoff,
+            JobRecord.source_job_id != item.source_job_id,
+        )
+        similar_jobs = session.exec(similar_jobs_stmt).all()
+        if not similar_jobs:
+            return False
+
+        new_desc = re.sub(r"\s+", " ", item.description_text[:1000].lower().strip())
+        if not new_desc:
+            return False
+
+        for existing_job in similar_jobs:
+            version_stmt = select(JobVersionRecord).where(
+                JobVersionRecord.job_id == existing_job.id,
+            ).order_by(JobVersionRecord.created_at.desc())
+            version = session.exec(version_stmt).first()
+            if version is None or not version.description_text:
+                continue
+            existing_desc = re.sub(r"\s+", " ", version.description_text[:1000].lower().strip())
+            ratio = SequenceMatcher(None, new_desc, existing_desc).ratio()
+            if ratio >= threshold:
+                return True
+
+        return False
+
     def upsert_jobs(
         self,
         run_id: str,
@@ -88,6 +126,7 @@ class JobRepository:
                 job_rec = session.exec(statement).first()
 
                 if job_rec is None:
+                    job_rec_is_new = True
                     job_rec = JobRecord(
                         source=item.source,
                         company=item.company,
@@ -103,6 +142,7 @@ class JobRepository:
                     session.add(job_rec)
                     session.flush()
                 else:
+                    job_rec_is_new = False
                     job_rec.url = str(item.url)
                     job_rec.title = item.title
                     job_rec.location_text = item.location_text
@@ -133,12 +173,21 @@ class JobRepository:
                         )
                     )
 
-                recent_alert_stmt = select(AlertRecord).where(
-                    AlertRecord.job_id == job_rec.id,
-                    AlertRecord.created_at >= cutoff,
-                )
-                recent_alert = session.exec(recent_alert_stmt).first()
-                is_new_alert = recent_alert is None
+                if job_rec_is_new:
+                    # New source_job_id: check if content-similar to recent job
+                    content_similar = self._is_content_similar_to_recent(
+                        session, item, cutoff,
+                    )
+                    is_new_alert = not content_similar
+                else:
+                    # Existing job: check dedup window
+                    recent_alert_stmt = select(AlertRecord).where(
+                        AlertRecord.job_id == job_rec.id,
+                        AlertRecord.created_at >= cutoff,
+                    )
+                    recent_alert = session.exec(recent_alert_stmt).first()
+                    is_new_alert = recent_alert is None
+
                 if is_new_alert:
                     session.add(AlertRecord(run_id=run_id, job_id=job_rec.id))
 
