@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from datetime import UTC, datetime, timedelta
 from difflib import SequenceMatcher
@@ -18,6 +19,8 @@ from jobfinder.models.db import (
     RunSourceStatusRecord,
 )
 from jobfinder.models.domain import NormalizedJobPosting, RankedJob, SearchProfile, SourceRunStatus
+
+logger = logging.getLogger(__name__)
 
 
 class JobRepository:
@@ -179,6 +182,12 @@ class JobRepository:
                         session, item, cutoff,
                     )
                     is_new_alert = not content_similar
+                    if content_similar:
+                        logger.info(
+                            "Suppressed alert for %s — content-similar to existing job at %s",
+                            item.fingerprint(),
+                            item.company,
+                        )
                 else:
                     # Existing job: check dedup window
                     recent_alert_stmt = select(AlertRecord).where(
