@@ -23,20 +23,26 @@ class OllamaFitScorer:
                 "You are a strict recruiter assistant. "
                 "Return only valid JSON with exact keys: "
                 "role_fit, research_fit, location_fit, seniority_fit, reasoning. "
-                "All score fields must be numbers from 0 to 10 and reasoning must be a short string."
+                "All score fields must be numbers from 0 to 10 and reasoning must be a short string. "
+                "If a candidate_summary is provided, use the candidate's stated preferences "
+                "to heavily influence role_fit and research_fit scores — reward jobs that "
+                "match what the candidate explicitly wants to do."
             )
         )
+        profile_data: dict[str, object] = {
+            "target_roles": profile.target_roles,
+            "role_synonyms": profile.role_synonyms,
+            "required_skills": profile.required_skills,
+            "optional_skills": profile.optional_skills,
+            "locations": profile.locations,
+            "location_policy": profile.location_policy,
+        }
+        if profile.candidate_summary:
+            profile_data["candidate_summary"] = profile.candidate_summary
         human = HumanMessage(
             content=json.dumps(
                 {
-                    "profile": {
-                        "target_roles": profile.target_roles,
-                        "role_synonyms": profile.role_synonyms,
-                        "required_skills": profile.required_skills,
-                        "optional_skills": profile.optional_skills,
-                        "locations": profile.locations,
-                        "location_policy": profile.location_policy,
-                    },
+                    "profile": profile_data,
                     "job": {
                         "title": job.title,
                         "location_text": job.location_text,
