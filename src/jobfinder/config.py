@@ -16,7 +16,7 @@ DEFAULT_USER_AGENT = (
 
 class AppSettings(BaseSettings):
     ollama_base_url: str = "http://127.0.0.1:11434"
-    ollama_chat_model: str = "qwen3:32b"
+    ollama_chat_model: str = "ministral-3:14b"
     ollama_embed_model: str = "nomic-embed-text"
     request_timeout_seconds: float = 30.0
     user_agent: str = DEFAULT_USER_AGENT
